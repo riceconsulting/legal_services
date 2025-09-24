@@ -154,8 +154,8 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ doc, baseVersionIndex, onClose 
             animation: highlight-pulse 2s ease-in-out;
         }
         .dark .highlight-line {
-            --highlight-color: rgba(243, 193, 58, 0.6);
-            --highlight-color-fade: rgba(243, 193, 58, 0.1);
+            --highlight-color: rgba(155, 187, 204, 0.6);
+            --highlight-color-fade: rgba(155, 187, 204, 0.1);
         }
       `}</style>
       <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in" style={{animationDuration: '0.3s'}} onClick={onClose}>
@@ -172,12 +172,12 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ doc, baseVersionIndex, onClose 
                       onChange={(e) => setGoToLine(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleGoToLine()}
                       placeholder="#"
-                      className="bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-md px-2 py-1 w-20 text-text-primary dark:text-text-primary-dark placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-teal dark:focus:ring-primary-gold"
+                      className="bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-md px-2 py-1 w-20 text-text-primary dark:text-text-primary-dark placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-teal dark:focus:ring-accent-sky"
                   />
                   <button 
                     onClick={handleGoToLine} 
                     disabled={isAnimating}
-                    className="bg-accent-teal hover:bg-opacity-90 dark:bg-primary-gold dark:text-primary-navy text-white font-bold py-1 px-3 rounded text-sm transition-colors disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+                    className="bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:text-primary-navy text-white font-bold py-1 px-3 rounded text-sm transition-colors disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                   >
                     Go
                   </button>
@@ -187,7 +187,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ doc, baseVersionIndex, onClose 
               <select
                   value={compareVersionIndex}
                   onChange={e => setCompareVersionIndex(parseInt(e.target.value))}
-                  className="bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-md px-3 py-1.5 text-text-primary dark:text-text-primary-dark focus:ring-2 focus:ring-accent-teal dark:focus:ring-primary-gold focus:outline-none"
+                  className="bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-md px-3 py-1.5 text-text-primary dark:text-text-primary-dark focus:ring-2 focus:ring-accent-teal dark:focus:ring-accent-sky focus:outline-none"
               >
                   {doc.versions.map((v, index) => (
                       index !== baseVersionIndex && <option key={v.version} value={index}>{v.version}</option>

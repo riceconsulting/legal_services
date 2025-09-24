@@ -6,10 +6,12 @@ import DocumentViewer from './components/DocumentViewer';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { MOCK_DOCUMENTS } from './constants';
+import * as geminiService from './services/geminiService';
 
 const App: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>(MOCK_DOCUMENTS);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
       const storedTheme = window.localStorage.getItem('theme');
@@ -42,28 +44,66 @@ const App: React.FC = () => {
     setSelectedDocument(null);
   };
 
-  const handleFileUpload = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const firstVersion: Version = {
-        version: 1,
-        date: new Date().toISOString().split('T')[0],
-        content: e.target?.result as string,
-      };
+  const handleFileUpload = async (file: File) => {
+    setIsUploading(true);
+    try {
+        let fileContent = '';
 
-      const newDoc: Document = {
-        id: `doc-${Date.now()}`,
-        name: file.name,
-        type: 'Perjanjian Kerjasama', // This could be inferred or asked
-        versions: [firstVersion],
-        draftContent: null,
-      };
-      
-      setDocuments(prevDocs => [newDoc, ...prevDocs]);
-      setSelectedDocument(newDoc);
-    };
-    reader.readAsText(file);
+        const supportedBinaryTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+        
+        if (file.type.startsWith('text/')) {
+            fileContent = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target?.result as string);
+                reader.onerror = (e) => reject(reader.error);
+                reader.readAsText(file);
+            });
+        } else if (supportedBinaryTypes.includes(file.type)) {
+            const base64Data = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dataUrl = e.target?.result as string;
+                    const base64String = dataUrl.split(',')[1];
+                    resolve(base64String);
+                };
+                reader.onerror = (e) => reject(reader.error);
+                reader.readAsDataURL(file);
+            });
+            fileContent = await geminiService.extractTextFromFile(base64Data, file.type);
+        } else {
+            alert(`Unsupported file type: ${file.type}. Please upload a PDF, DOCX, or TXT file.`);
+            setIsUploading(false);
+            return;
+        }
+
+        const firstVersion: Version = {
+            version: 1,
+            date: new Date().toISOString().split('T')[0],
+            content: fileContent,
+        };
+
+        const newDoc: Document = {
+            id: `doc-${Date.now()}`,
+            name: file.name,
+            type: 'Perjanjian Kerjasama', // This could be inferred or asked
+            versions: [firstVersion],
+            draftContent: null,
+        };
+        
+        setDocuments(prevDocs => [newDoc, ...prevDocs]);
+        setSelectedDocument(newDoc);
+    } catch (error) {
+        console.error("Error processing file upload:", error);
+        alert(`An error occurred while processing the file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+        setIsUploading(false);
+    }
   };
+
 
   const handleSaveNewVersion = (documentId: string, newContent: string) => {
     setDocuments(prevDocs => {
@@ -139,6 +179,7 @@ const App: React.FC = () => {
                 onSelectDocument={handleSelectDocument} 
                 onFileUpload={handleFileUpload}
                 onDeleteDocument={handleDeleteDocument}
+                isUploading={isUploading}
               />
             )}
         </div>

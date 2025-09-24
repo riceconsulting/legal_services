@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Risk, Summary, QnAResponse } from '../types';
 
@@ -11,6 +12,31 @@ if (!API_KEY) {
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 const model = 'gemini-2.5-flash';
+
+export const extractTextFromFile = async (base64Data: string, mimeType: string): Promise<string> => {
+    const prompt = "Extract all text content from this document. Return only the raw text, without any additional formatting, commentary, or explanations.";
+
+    try {
+        const response = await ai.models.generateContent({
+            model: model,
+            contents: {
+                parts: [
+                    {
+                        inlineData: {
+                            data: base64Data,
+                            mimeType: mimeType,
+                        },
+                    },
+                    { text: prompt },
+                ],
+            },
+        });
+        return response.text;
+    } catch (error) {
+        console.error("Error extracting text from file:", error);
+        throw new Error("Failed to extract text using AI service.");
+    }
+};
 
 export const generateSummary = async (documentText: string): Promise<Summary> => {
     const prompt = `
@@ -179,6 +205,7 @@ export const extractClause = async (documentText: string, clauseDescription: str
             contents: prompt,
         });
         return response.text;
+    // Fix: Corrected typo in catch block syntax.
     } catch (error) {
         console.error("Error extracting clause:", error);
         throw new Error("Failed to communicate with AI service.");

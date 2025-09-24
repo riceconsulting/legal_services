@@ -1,32 +1,39 @@
+
 import React, { useState, useRef, useCallback } from 'react';
 import { UploadIcon } from './icons/UploadIcon';
+import Loader from './Loader';
 
 interface FileUploadProps {
   onFileUpload: (file: File) => void;
+  isProcessing: boolean;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isProcessing }) => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    if (isProcessing) return;
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    if (isProcessing) return;
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   };
   
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    if (isProcessing) return;
     e.preventDefault();
     e.stopPropagation();
   };
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (isProcessing) return;
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -34,13 +41,15 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
       onFileUpload(e.dataTransfer.files[0]);
       e.dataTransfer.clearData();
     }
-  }, [onFileUpload]);
+  }, [onFileUpload, isProcessing]);
 
   const handleClick = () => {
+    if (isProcessing) return;
     fileInputRef.current?.click();
   };
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isProcessing) return;
     if (e.target.files && e.target.files.length > 0) {
       onFileUpload(e.target.files[0]);
     }
@@ -48,28 +57,35 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
 
   return (
     <div
-      className={`relative block w-full rounded-lg border-2 border-dashed p-12 text-center transition-all duration-300 ease-in-out ${isDragging ? 'border-primary-navy dark:border-primary-gold bg-accent-sky/20 dark:bg-primary-gold/10 scale-105' : 'border-accent-teal dark:border-border-dark hover:border-primary-navy dark:hover:border-primary-gold'}`}
+      className={`relative block w-full rounded-lg border-2 border-dashed p-12 text-center transition-all duration-300 ease-in-out ${isProcessing ? 'border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-surface-dark/50 cursor-not-allowed' : (isDragging ? 'border-primary-navy dark:border-accent-sky bg-accent-sky/20 dark:bg-accent-sky/10 scale-105' : 'border-accent-teal dark:border-border-dark hover:border-primary-navy dark:hover:border-accent-sky')}`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onClick={handleClick}
     >
-      <div className={`flex flex-col items-center transition-transform duration-300 ${isDragging ? 'scale-95' : 'scale-100'}`}>
-        <UploadIcon className="mx-auto h-12 w-12 text-accent-teal dark:text-accent-sky" />
-        <span className="mt-4 block text-base sm:text-lg font-semibold text-text-primary dark:text-text-primary-dark">
-          Drag and drop files here
-        </span>
-        <span className="mt-1 block text-sm text-text-secondary dark:text-text-secondary-dark">or click to browse</span>
-        <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            onChange={handleFileChange}
-            accept=".pdf,.doc,.docx,.txt"
-        />
-      </div>
-      <div className="mt-4 text-xs text-accent-sky dark:text-text-secondary-dark/70">Supports PDF, DOCX, TXT. AES-256 Encrypted.</div>
+      {isProcessing ? (
+        <Loader text="AI is converting your document to text..." />
+      ) : (
+        <>
+          <div className={`flex flex-col items-center transition-transform duration-300 ${isDragging ? 'scale-95' : 'scale-100'}`}>
+            <UploadIcon className="mx-auto h-12 w-12 text-accent-teal dark:text-accent-sky" />
+            <span className="mt-4 block text-base sm:text-lg font-semibold text-text-primary dark:text-text-primary-dark">
+              Drag & Drop a Document Here
+            </span>
+            <span className="mt-1 block text-sm text-text-secondary dark:text-text-secondary-dark">or Click to Upload</span>
+            <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                onChange={handleFileChange}
+                accept=".pdf,.doc,.docx,.txt"
+                disabled={isProcessing}
+            />
+          </div>
+          <div className="mt-4 text-xs text-accent-sky dark:text-text-secondary-dark/70">Supports PDF, DOCX, TXT. AES-256 Encrypted.</div>
+        </>
+      )}
     </div>
   );
 };

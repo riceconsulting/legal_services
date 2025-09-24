@@ -9,12 +9,14 @@ import { GavelIcon } from './icons/GavelIcon';
 import { ScrollIcon } from './icons/ScrollIcon';
 import { StampIcon } from './icons/StampIcon';
 import { TrashIcon } from './icons/TrashIcon';
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
 interface DashboardProps {
   documents: Document[];
   onSelectDocument: (doc: Document) => void;
   onFileUpload: (file: File) => void;
   onDeleteDocument: (documentId: string) => void;
+  isUploading: boolean;
 }
 
 const TypeIcon: React.FC<{ type: string; className: string }> = ({ type, className }) => {
@@ -33,7 +35,7 @@ const TypeIcon: React.FC<{ type: string; className: string }> = ({ type, classNa
 };
 
 
-const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFileUpload, onDeleteDocument }) => {
+const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFileUpload, onDeleteDocument, isUploading }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [docToDelete, setDocToDelete] = useState<Document | null>(null);
 
@@ -60,49 +62,23 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
     }
   };
   
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-heading text-4xl sm:text-5xl font-bold text-text-primary dark:text-text-primary-dark">Welcome, Counsel</h1>
-        <p className="text-text-secondary dark:text-text-secondary-dark mt-1">Manage your legal documents with the power of AI.</p>
-      </div>
-      
-      <FileUpload onFileUpload={onFileUpload} />
+  const DocumentRow: React.FC<ListChildComponentProps> = ({ index, style }) => {
+      const doc = filteredDocuments[index];
+      const latestVersion = doc.versions[0];
+      if (!latestVersion) return null;
 
-      <div>
-        <h2 className="font-heading text-xl font-semibold text-text-primary dark:text-text-primary-dark mb-4">Recent Projects</h2>
-         <div className="relative mb-4 group">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <SearchIcon className="h-5 w-5 text-text-secondary dark:text-text-secondary-dark" aria-hidden="true" />
-          </div>
-          <input
-            type="search"
-            name="search"
-            id="search"
-            className="block w-full rounded-md border-0 bg-background-main dark:bg-surface-dark py-2.5 pl-10 pr-3 text-text-primary dark:text-text-primary-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark transition-shadow focus:ring-2 focus:ring-inset focus:ring-accent-teal dark:focus:ring-primary-gold sm:text-sm sm:leading-6"
-            placeholder="Search by name, type, or keyword..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <div className="bg-background-main dark:bg-surface-dark rounded-lg shadow-md overflow-hidden">
-         {filteredDocuments.length > 0 ? (
-          <ul role="list" className="divide-y divide-border-light dark:divide-border-dark">
-            {filteredDocuments.map((doc, index) => {
-              const latestVersion = doc.versions[0];
-              if (!latestVersion) return null; // Should not happen with valid data
-
-              return (
-                <li 
-                  key={doc.id} 
+      return (
+          <div style={style}>
+              <div 
                   onClick={() => onSelectDocument(doc)} 
-                  className="group cursor-pointer hover:bg-background-light dark:hover:bg-background-dark/50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl dark:hover:shadow-black/30"
-                  style={{ animation: `fadeIn 0.5s ease-out ${index * 0.05}s forwards`, opacity: 0 }}
-                >
-                  <div className="flex items-center px-4 py-4 sm:px-6">
+                  className="group cursor-pointer hover:bg-background-light dark:hover:bg-background-dark/50 transition-colors duration-200 w-full h-full flex items-center border-b border-border-light dark:border-border-dark"
+                  role="button"
+                  tabIndex={0}
+              >
+                  <div className="flex items-center px-4 py-4 sm:px-6 w-full">
                     <div className="flex min-w-0 flex-1 items-center">
                       <div className="flex-shrink-0">
-                        <TypeIcon type={doc.type} className="h-8 w-8 text-text-secondary dark:text-text-secondary-dark group-hover:text-accent-teal dark:group-hover:text-primary-gold transition-colors" />
+                        <TypeIcon type={doc.type} className="h-8 w-8 text-text-secondary dark:text-text-secondary-dark group-hover:text-accent-teal dark:group-hover:text-accent-sky transition-colors" />
                       </div>
                       <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-3 md:gap-4">
                         <div>
@@ -148,20 +124,72 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                         </div>
                     </div>
                   </div>
-                </li>
-              );
-            })}
-          </ul>
-           ) : (
-            <div className="px-6 py-12 text-center animate-fade-in">
-              <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">No documents found</h3>
-              <p className="mt-1 text-sm text-text-secondary dark:text-text-secondary-dark">
-                Your search for "{searchQuery}" did not match any documents.
-              </p>
-            </div>
-          )}
-        </div>
+              </div>
+          </div>
+      );
+  };
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="font-heading text-4xl sm:text-5xl font-bold text-text-primary dark:text-text-primary-dark">Welcome, Counsel</h1>
+        <p className="text-text-secondary dark:text-text-secondary-dark mt-1">Manage your legal documents with the power of AI.</p>
       </div>
+      
+      <FileUpload onFileUpload={onFileUpload} isProcessing={isUploading} />
+
+      {documents.length > 0 ? (
+        <div>
+            <h2 className="font-heading text-xl font-semibold text-text-primary dark:text-text-primary-dark mb-4">Recent Projects</h2>
+            <div className="relative mb-4 group">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <SearchIcon className="h-5 w-5 text-text-secondary dark:text-text-secondary-dark" aria-hidden="true" />
+            </div>
+            <input
+                type="search"
+                name="search"
+                id="search"
+                className="block w-full rounded-md border-0 bg-background-main dark:bg-surface-dark py-2.5 pl-10 pr-3 text-text-primary dark:text-text-primary-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark transition-shadow focus:ring-2 focus:ring-inset focus:ring-accent-teal dark:focus:ring-accent-sky sm:text-sm sm:leading-6"
+                placeholder="Search by name, type, or keyword..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            </div>
+            <div className="bg-background-main dark:bg-surface-dark rounded-lg shadow-md overflow-hidden h-[600px]">
+            {filteredDocuments.length > 0 ? (
+                <List
+                    height={600}
+                    itemCount={filteredDocuments.length}
+                    itemSize={88}
+                    width="100%"
+                >
+                    {DocumentRow}
+                </List>
+            ) : (
+                <div className="h-full flex flex-col items-center justify-center px-6 py-12 text-center animate-fade-in">
+                <SearchIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
+                <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
+                    No documents found
+                </h3>
+                <p className="mt-1 text-sm text-text-secondary dark:text-text-secondary-dark max-w-sm">
+                    Your search for "{searchQuery}" did not match any documents. Try a different keyword.
+                </p>
+                </div>
+            )}
+            </div>
+        </div>
+        ) : (
+            <div className="text-center py-12 animate-fade-in">
+                <DocumentIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
+                    Your Workspace is Ready
+                </h3>
+                <p className="mt-1 text-sm text-text-secondary dark:text-text-secondary-dark max-w-sm mx-auto">
+                   To get started, upload your first legal document. You can then analyze, identify risks, and ask questions with AI.
+                </p>
+            </div>
+        )}
+
        <ConfirmationModal
         isOpen={!!docToDelete}
         onClose={() => setDocToDelete(null)}

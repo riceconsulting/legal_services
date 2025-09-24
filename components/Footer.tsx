@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
             href="https://api.whatsapp.com/send/?phone=6285330168811&text=Hi%2C+I'm+interested+in+discussing+custom+AI+solutions+for+my+legal+practice.&type=phone_number&app_absent=0"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 bg-accent-teal dark:bg-primary-gold text-white dark:text-primary-navy font-semibold rounded-lg shadow-md hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface-light dark:focus:ring-offset-surface-dark focus:ring-accent-teal dark:focus:ring-primary-gold transition-all duration-200 transform hover:scale-105 active:scale-95"
+            className="px-4 py-2 bg-accent-teal dark:bg-accent-sky text-white dark:text-primary-navy font-semibold rounded-lg shadow-md hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface-light dark:focus:ring-offset-surface-dark focus:ring-accent-teal dark:focus:ring-accent-sky transition-all duration-200 transform hover:scale-105 active:scale-95"
           >
             Contact Us
           </a>
