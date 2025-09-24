@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import type { Document, Version } from './types';
 import Dashboard from './components/Dashboard';
 import DocumentViewer from './components/DocumentViewer';
@@ -10,7 +11,6 @@ import * as geminiService from './services/geminiService';
 
 const App: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>(MOCK_DOCUMENTS);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -21,6 +21,8 @@ const App: React.FC = () => {
     }
     return 'light';
   });
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -37,11 +39,7 @@ const App: React.FC = () => {
   };
 
   const handleSelectDocument = (doc: Document) => {
-    setSelectedDocument(doc);
-  };
-
-  const handleBackToDashboard = () => {
-    setSelectedDocument(null);
+    navigate(`/document/${doc.id}`);
   };
 
   const handleFileUpload = async (file: File) => {
@@ -95,7 +93,7 @@ const App: React.FC = () => {
         };
         
         setDocuments(prevDocs => [newDoc, ...prevDocs]);
-        setSelectedDocument(newDoc);
+        navigate(`/document/${newDoc.id}`);
     } catch (error) {
         console.error("Error processing file upload:", error);
         alert(`An error occurred while processing the file: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -107,82 +105,93 @@ const App: React.FC = () => {
 
   const handleSaveNewVersion = (documentId: string, newContent: string) => {
     setDocuments(prevDocs => {
-      const newDocs = prevDocs.map(doc => {
+      return prevDocs.map(doc => {
         if (doc.id === documentId) {
           const latestVersionNumber = doc.versions[0]?.version || 0;
           const newVersion: Version = {
             version: latestVersionNumber + 1,
-            // Fix: Corrected typo from newtoISOString to new Date().toISOString()
             date: new Date().toISOString().split('T')[0],
             content: newContent,
           };
-          const updatedDoc = {
+          return {
             ...doc,
             versions: [newVersion, ...doc.versions],
             draftContent: null, // Clear draft when a new version is saved
           };
-          // Update the selected document in state if it's the one being edited
-          if (selectedDocument?.id === documentId) {
-            setSelectedDocument(updatedDoc);
-          }
-          return updatedDoc;
         }
         return doc;
       });
-      return newDocs;
     });
   };
 
   const handleSaveDraft = (documentId: string, draftContent: string) => {
     setDocuments(prevDocs => {
-      const newDocs = prevDocs.map(doc => {
+      return prevDocs.map(doc => {
         if (doc.id === documentId) {
-           const updatedDoc = {
+           return {
             ...doc,
             draftContent: draftContent,
           };
-           if (selectedDocument?.id === documentId) {
-            setSelectedDocument(updatedDoc);
-          }
-          return updatedDoc;
         }
         return doc;
       });
-      return newDocs;
     });
   };
 
   const handleDeleteDocument = (documentId: string) => {
-    setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== documentId));
-    // If the currently viewed document is deleted, go back to dashboard
-    if (selectedDocument?.id === documentId) {
-      setSelectedDocument(null);
+    if (location.pathname.includes(`/document/${documentId}`)) {
+      navigate('/');
     }
+    setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== documentId));
   };
+  
+  const DocumentViewerWrapper = () => {
+    const { documentId } = useParams<{ documentId: string }>();
+    const document = documents.find(d => d.id === documentId);
 
+    useEffect(() => {
+        // If document is not found (e.g., after deletion or bad link), redirect to dashboard
+        if (!document) {
+            navigate('/');
+        }
+    }, [document, navigate]);
+
+    if (!document) {
+        return null; // Render nothing while redirecting
+    }
+
+    return (
+        <div className="animate-fade-in">
+            <DocumentViewer 
+                key={document.id}
+                document={document} 
+                onBack={() => navigate('/')} 
+                onSaveNewVersion={handleSaveNewVersion}
+                onSaveDraft={handleSaveDraft}
+            />
+        </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <Header theme={theme} toggleTheme={toggleTheme} />
       <main className="p-4 sm:p-6 lg:p-8 pb-24">
-        <div key={selectedDocument ? selectedDocument.id : 'dashboard'} className="animate-fade-in">
-            {selectedDocument ? (
-              <DocumentViewer 
-                document={selectedDocument} 
-                onBack={handleBackToDashboard} 
-                onSaveNewVersion={handleSaveNewVersion}
-                onSaveDraft={handleSaveDraft}
-              />
-            ) : (
-              <Dashboard 
-                documents={documents} 
-                onSelectDocument={handleSelectDocument} 
-                onFileUpload={handleFileUpload}
-                onDeleteDocument={handleDeleteDocument}
-                isUploading={isUploading}
-              />
-            )}
-        </div>
+        <Routes>
+          <Route path="/" element={
+            <div className="animate-fade-in">
+                <Dashboard 
+                    documents={documents} 
+                    onSelectDocument={handleSelectDocument} 
+                    onFileUpload={handleFileUpload}
+                    onDeleteDocument={handleDeleteDocument}
+                    isUploading={isUploading}
+                />
+            </div>
+            } 
+          />
+          <Route path="/document/:documentId" element={<DocumentViewerWrapper />} />
+        </Routes>
       </main>
       <Footer />
     </div>

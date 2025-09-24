@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import type { Document, Risk, Summary, AnalysisType, QnAResponse } from '../types';
 import { AnalysisType as AnalysisTypeEnum } from '../types';
@@ -95,17 +96,11 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, documentText, onRec
         setError(null);
         setInputValue('');
         onReceiveQuote(null);
-        
-        const isAutoRun = type && type !== AnalysisTypeEnum.QNA && type !== AnalysisTypeEnum.CLAUSE_EXTRACTION && type !== AnalysisTypeEnum.TRANSLATION;
-
-        if(isAutoRun){
-            handleAnalysis(type);
-        }
-    }, [type, handleAnalysis, onReceiveQuote]);
+    }, [type, onReceiveQuote]);
 
     const renderResult = () => {
         if (isLoading) return <div className="flex justify-center items-center h-full p-4"><Loader text={type ? LOADING_MESSAGES[type] : undefined} /></div>;
-        if (error) return <div className="text-red-500 p-4 animate-fade-in">{error}</div>;
+        if (error) return <div className="text-red-500 p-6 animate-fade-in">{error}</div>;
         
         if (!type) return (
              <div className="p-6 h-full flex flex-col items-center justify-center text-center animate-fade-in">
@@ -118,49 +113,74 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, documentText, onRec
                 </p>
             </div>
         );
+        
+        // Render trigger UIs for tools that require manual initiation
+        if (!result) {
+            const commonButtonClasses = "w-full bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:text-primary-navy dark:hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-md transition duration-200 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-base transform hover:scale-105 active:scale-95";
 
-        if (type === AnalysisTypeEnum.TRANSLATION && !result) {
-            return (
-                <div className="p-4 space-y-4 animate-fade-in">
-                    <div>
-                        <label className="block text-sm font-medium text-text-primary dark:text-text-primary-dark mb-2">
-                            Target Language
-                        </label>
-                        <div className="flex w-full rounded-lg bg-background-light dark:bg-background-dark p-1 border border-border-light dark:border-border-dark">
-                            <button
-                                onClick={() => setTargetLanguage('english')}
-                                className={`w-full rounded-md py-1.5 text-sm font-semibold transition-colors ${targetLanguage === 'english' ? 'bg-accent-teal text-white shadow' : 'text-text-secondary hover:bg-gray-200 dark:hover:bg-surface-dark'}`}
-                            >
-                                English
-                            </button>
-                            <button
-                                onClick={() => setTargetLanguage('bahasa indonesia')}
-                                className={`w-full rounded-md py-1.5 text-sm font-semibold transition-colors ${targetLanguage === 'bahasa indonesia' ? 'bg-accent-teal text-white shadow' : 'text-text-secondary hover:bg-gray-200 dark:hover:bg-surface-dark'}`}
-                            >
-                                Bahasa Indonesia
-                            </button>
-                        </div>
+            if (type === AnalysisTypeEnum.SUMMARY) {
+                return (
+                    <div className="p-6 text-center animate-fade-in space-y-4 pb-16 flex flex-col justify-center h-full">
+                        <SummaryIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto" />
+                        <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Generate an executive summary and identify key clauses in the document.</p>
+                        <button onClick={() => handleAnalysis(type)} disabled={isLoading} className={commonButtonClasses}>
+                            {isLoading ? <span className="animate-pulse">Generating...</span> : 'Generate Summary'}
+                        </button>
                     </div>
-                    <button
-                        onClick={() => handleAnalysis(type, undefined, targetLanguage)}
-                        disabled={isLoading}
-                        className="w-full bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:text-primary-navy dark:hover:bg-opacity-90 text-white font-bold py-2 px-4 rounded-md transition duration-200 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed">
-                        {isLoading ? <span className="animate-pulse">Translating...</span> : 'Translate Document'}
-                    </button>
-                </div>
-            );
+                );
+            }
+            if (type === AnalysisTypeEnum.RISK_ANALYSIS) {
+                return (
+                     <div className="p-6 text-center animate-fade-in space-y-4 pb-16 flex flex-col justify-center h-full">
+                        <RiskIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto" />
+                        <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Analyze the document for potential legal risks, missing clauses, and compliance issues.</p>
+                        <button onClick={() => handleAnalysis(type)} disabled={isLoading} className={commonButtonClasses}>
+                            {isLoading ? <span className="animate-pulse">Analyzing...</span> : 'Analyze for Risks'}
+                        </button>
+                    </div>
+                );
+            }
+            if (type === AnalysisTypeEnum.TRANSLATION) {
+                return (
+                    <div className="p-4 space-y-4 animate-fade-in pb-16">
+                        <div>
+                            <label className="block text-sm font-medium text-text-primary dark:text-text-primary-dark mb-2">
+                                Target Language
+                            </label>
+                            <div className="flex w-full rounded-lg bg-background-light dark:bg-background-dark p-1 border border-border-light dark:border-border-dark">
+                                <button
+                                    onClick={() => setTargetLanguage('english')}
+                                    className={`w-full rounded-md py-1.5 text-sm font-semibold transition-colors ${targetLanguage === 'english' ? 'bg-accent-teal text-white shadow' : 'text-text-secondary hover:bg-gray-200 dark:hover:bg-surface-dark'}`}
+                                >
+                                    English
+                                </button>
+                                <button
+                                    onClick={() => setTargetLanguage('bahasa indonesia')}
+                                    className={`w-full rounded-md py-1.5 text-sm font-semibold transition-colors ${targetLanguage === 'bahasa indonesia' ? 'bg-accent-teal text-white shadow' : 'text-text-secondary hover:bg-gray-200 dark:hover:bg-surface-dark'}`}
+                                >
+                                    Bahasa Indonesia
+                                </button>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => handleAnalysis(type, undefined, targetLanguage)}
+                            disabled={isLoading}
+                            className="w-full bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:text-primary-navy dark:hover:bg-opacity-90 text-white font-bold py-2 px-4 rounded-md transition duration-200 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed">
+                            {isLoading ? <span className="animate-pulse">Translating...</span> : 'Translate Document'}
+                        </button>
+                    </div>
+                );
+            }
+            // For QNA and Clause Extraction, the input field is always visible, so no special "no result" screen is needed.
+            return null;
         }
 
-        if (!result) {
-          if (type === AnalysisTypeEnum.QNA || type === AnalysisTypeEnum.CLAUSE_EXTRACTION) return null;
-          return null;
-        };
-
+        // Render actual results
         switch (type) {
             case AnalysisTypeEnum.SUMMARY:
                 const summary: Summary = result;
                 return (
-                    <div className="p-4 space-y-4 animate-fade-in">
+                    <div className="p-4 space-y-4 animate-fade-in pb-16">
                         <h3 className="font-heading text-lg font-semibold text-text-primary dark:text-text-primary-dark">Executive Summary</h3>
                         <p className="text-text-primary dark:text-text-primary-dark text-sm leading-relaxed">{summary?.executive || 'Summary not available.'}</p>
                         <h3 className="font-heading text-lg font-semibold text-text-primary dark:text-text-primary-dark mt-6">Key Clauses & Terms</h3>
@@ -183,7 +203,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, documentText, onRec
                 if (!Array.isArray(risks) || risks.length === 0) return <div className="p-4 text-green-600 dark:text-green-400 animate-fade-in">No significant risks found.</div>;
                 const riskColorMap = { High: 'bg-red-500', Medium: 'bg-yellow-500', Low: 'bg-blue-500', Info: 'bg-gray-500' };
                 return (
-                     <div className="p-4 space-y-4 animate-fade-in">
+                     <div className="p-4 space-y-4 animate-fade-in pb-16">
                         {risks.map((risk, index) => (
                             <div key={risk.id || `risk-${index}`} className="bg-background-light dark:bg-background-dark p-4 rounded-lg border border-border-light dark:border-border-dark">
                                 <div className="flex items-center mb-2">
@@ -197,11 +217,11 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, documentText, onRec
                     </div>
                 );
             case AnalysisTypeEnum.TRANSLATION:
-                 return <div className="p-4 animate-fade-in"><pre className="whitespace-pre-wrap font-sans text-sm text-text-primary dark:text-text-primary-dark">{result}</pre></div>;
+                 return <div className="p-4 animate-fade-in pb-16"><pre className="whitespace-pre-wrap font-sans text-sm text-text-primary dark:text-text-primary-dark">{result}</pre></div>;
             case AnalysisTypeEnum.QNA:
                 const qnaResponse: QnAResponse = result;
                 return (
-                    <div className="p-4 space-y-4 animate-fade-in">
+                    <div className="p-4 space-y-4 animate-fade-in pb-16">
                         <p className="text-text-primary dark:text-text-primary-dark">{qnaResponse.answer}</p>
                         {qnaResponse.quote && (
                             <blockquote className="border-l-4 border-accent-sky dark:border-accent-teal pl-3 my-2 text-sm text-text-secondary dark:text-text-secondary-dark italic">"{qnaResponse.quote}"</blockquote>
@@ -209,7 +229,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, documentText, onRec
                     </div>
                 );
             case AnalysisTypeEnum.CLAUSE_EXTRACTION:
-                return <div className="p-4 animate-fade-in"><pre className="whitespace-pre-wrap font-sans text-sm text-text-primary dark:text-text-primary-dark">{result}</pre></div>;
+                return <div className="p-4 animate-fade-in pb-16"><pre className="whitespace-pre-wrap font-sans text-sm text-text-primary dark:text-text-primary-dark">{result}</pre></div>;
             default:
                 return null;
         }

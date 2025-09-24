@@ -1,4 +1,5 @@
 
+
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Risk, Summary, QnAResponse } from '../types';
 
@@ -10,8 +11,46 @@ if (!API_KEY) {
 }
 
 const ai = new GoogleGenAI({ apiKey: API_KEY });
-
 const model = 'gemini-2.5-flash';
+
+/**
+ * A centralized error handler for API calls.
+ * @param error The catched error.
+ * @param functionName The name of the function where the error occurred.
+ * @returns A new Error object with a user-friendly message.
+ */
+const handleApiError = (error: any, functionName: string): Error => {
+    console.error(`Error in ${functionName}:`, error);
+
+    // Check for Gemini API's specific error structure in the SDK's response
+    if (error instanceof Error && error.message.includes('FetchError')) {
+        try {
+            const jsonString = error.message.substring(error.message.indexOf('{'));
+            const parsed = JSON.parse(jsonString);
+            if (parsed?.error?.code) {
+                const apiError = parsed.error;
+                if (apiError.status === 'RESOURCE_EXHAUSTED' || apiError.code === 429) {
+                    return new Error("You have exceeded your API quota. For a higher limit, please get in touch with us using the 'Contact Us' button in the footer.");
+                }
+                return new Error(`An API error occurred: ${apiError.message || 'Unknown API error'}`);
+            }
+        } catch (e) {
+            // Fall through if parsing fails
+        }
+    }
+    
+    // Check for standard JS Error object for other issues (e.g., our own JSON.parse failing)
+    if (error instanceof Error) {
+        if (error.message.toLowerCase().includes('json')) {
+             return new Error("Failed to process the AI's response. The format was unexpected.");
+        }
+        return new Error(`An unexpected error occurred: ${error.message}`);
+    }
+
+    // Fallback for unknown errors
+    return new Error("An unknown error occurred while communicating with the AI service.");
+}
+
 
 export const extractTextFromFile = async (base64Data: string, mimeType: string): Promise<string> => {
     const prompt = "Extract all text content from this document. Return only the raw text, without any additional formatting, commentary, or explanations.";
@@ -33,8 +72,7 @@ export const extractTextFromFile = async (base64Data: string, mimeType: string):
         });
         return response.text;
     } catch (error) {
-        console.error("Error extracting text from file:", error);
-        throw new Error("Failed to extract text using AI service.");
+        throw handleApiError(error, 'extractTextFromFile');
     }
 };
 
@@ -48,12 +86,6 @@ export const generateSummary = async (documentText: string): Promise<Summary> =>
     ---
     ${documentText}
     ---
-    
-    Return the output in a JSON object with the following structure:
-    {
-      "executive": "string",
-      "keyClauses": [{ "title": "string", "detail": "string" }]
-    }
     `;
 
     try {
@@ -61,14 +93,31 @@ export const generateSummary = async (documentText: string): Promise<Summary> =>
             model: model,
             contents: prompt,
             config: {
-                responseMimeType: 'application/json'
+                responseMimeType: 'application/json',
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        executive: { type: Type.STRING },
+                        keyClauses: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    title: { type: Type.STRING },
+                                    detail: { type: Type.STRING },
+                                },
+                                required: ["title", "detail"]
+                            }
+                        }
+                    },
+                    required: ["executive", "keyClauses"]
+                }
             }
         });
-        const text = response.text.trim();
+        const text = response.text.trim().replace(/^```json\s*|```\s*$/g, '');
         return JSON.parse(text) as Summary;
     } catch (error) {
-        console.error("Error generating summary:", error);
-        throw new Error("Failed to communicate with AI service.");
+        throw handleApiError(error, 'generateSummary');
     }
 };
 
@@ -109,7 +158,6 @@ export const analyzeRisks = async (documentText: string): Promise<Risk[]> => {
             }
         });
         const jsonStr = response.text.trim();
-        // The API response might be wrapped in markdown, or be empty.
         const cleanedJsonStr = jsonStr.replace(/^```json\s*|```\s*$/g, '');
         if (!cleanedJsonStr) {
           return [];
@@ -117,15 +165,13 @@ export const analyzeRisks = async (documentText: string): Promise<Risk[]> => {
         
         const parsedData = JSON.parse(cleanedJsonStr);
 
-        // The API might return a single object if only one risk is found. We ensure it's always an array.
         if (Array.isArray(parsedData)) {
             return parsedData as Risk[];
         } else {
             return [parsedData] as Risk[];
         }
     } catch (error) {
-        console.error("Error analyzing risks:", error);
-        throw new Error("Failed to communicate with AI service.");
+        throw handleApiError(error, 'analyzeRisks');
     }
 };
 
@@ -150,8 +196,7 @@ export const translateText = async (documentText: string, targetLanguage: 'engli
         });
         return response.text;
     } catch (error) {
-        console.error("Error translating text:", error);
-        throw new Error("Failed to communicate with AI service.");
+        throw handleApiError(error, 'translateText');
     }
 }
 
@@ -160,8 +205,6 @@ export const answerQuestion = async (documentText: string, question: string): Pr
     You are a helpful Q&A assistant for legal documents. Answer the following question based ONLY on the provided document text. 
     Provide a direct answer in Bahasa Indonesia and include the exact, verbatim quote from the document that contains the answer.
     If the answer is not in the document, state that clearly in the 'answer' field and leave the 'quote' field empty.
-
-    Return a JSON object with this exact structure: { "answer": "...", "quote": "..." }
 
     DOCUMENT:
     ---
@@ -178,13 +221,20 @@ export const answerQuestion = async (documentText: string, question: string): Pr
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        answer: { type: Type.STRING },
+                        quote: { type: Type.STRING },
+                    },
+                    required: ["answer", "quote"]
+                }
             }
         });
-        const jsonStr = response.text.trim();
+        const jsonStr = response.text.trim().replace(/^```json\s*|```\s*$/g, '');
         return JSON.parse(jsonStr) as QnAResponse;
     } catch (error) {
-        console.error("Error answering question:", error);
-        throw new Error("Failed to communicate with AI service.");
+        throw handleApiError(error, 'answerQuestion');
     }
 };
 
@@ -205,9 +255,7 @@ export const extractClause = async (documentText: string, clauseDescription: str
             contents: prompt,
         });
         return response.text;
-    // Fix: Corrected typo in catch block syntax.
     } catch (error) {
-        console.error("Error extracting clause:", error);
-        throw new Error("Failed to communicate with AI service.");
+        throw handleApiError(error, 'extractClause');
     }
 };
