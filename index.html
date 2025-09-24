@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RICE AI - Legal Service Helper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes slideInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+      }
+      .animate-slide-in-down {
+        animation: slideInDown 0.5s ease-out forwards;
+      }
+    </style>
+    <script>
+      // Prevents flash of unstyled content (FOUC) by applying theme on initial load
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+
+      tailwind.config = {
+        darkMode: 'class', // Enable dark mode based on class
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              heading: ['Poppins', 'sans-serif'],
+            },
+            colors: {
+              'primary-navy': '#192D46',
+              'primary-gold': '#F3C13A',
+              'accent-teal': '#5890AD',
+              'accent-sky': '#9BBBCC',
+              
+              // Light Theme (default)
+              'background-light': '#F7FAFC',
+              'background-main': '#FFFFFF',
+              'surface-light': '#FFFFFF',
+              'text-primary': '#2D3748',
+              'text-secondary': '#5890AD',
+              'border-light': '#E2E8F0',
+
+              // Dark Theme
+              'background-dark': '#1A202C',
+              'surface-dark': '#2D3748',
+              'text-primary-dark': '#E2E8F0',
+              'text-secondary-dark': '#9BBBCC',
+              'border-dark': '#4A5568',
+            },
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.20.0",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/"
+  }
+}
+</script>
+</head>
+  <body class="bg-background-light dark:bg-background-dark text-text-primary dark:text-text-primary-dark font-sans transition-colors duration-300">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
