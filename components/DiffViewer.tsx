@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import type { Document } from '../types';
 
 interface DiffViewerProps {
@@ -50,6 +50,17 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ doc, baseVersionIndex, onClose 
   const [goToLine, setGoToLine] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
   const rightPaneRef = useRef<HTMLDivElement>(null);
+  const animationTimerRef = useRef<number | null>(null);
+
+  // Effect to clear the animation timeout when the component unmounts.
+  // This prevents trying to update state on an unmounted component.
+  useEffect(() => {
+    return () => {
+      if (animationTimerRef.current) {
+        clearTimeout(animationTimerRef.current);
+      }
+    };
+  }, []);
 
   const baseVersion = doc.versions[baseVersionIndex];
   const compareVersion = doc.versions[compareVersionIndex];
@@ -70,7 +81,13 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ doc, baseVersionIndex, onClose 
         setIsAnimating(true);
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         el.classList.add('highlight-line');
-        setTimeout(() => {
+        
+        // Clear any previous timer
+        if (animationTimerRef.current) {
+            clearTimeout(animationTimerRef.current);
+        }
+
+        animationTimerRef.current = window.setTimeout(() => {
             el.classList.remove('highlight-line');
             setIsAnimating(false);
         }, 2000);

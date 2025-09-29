@@ -10,6 +10,7 @@ import { ScrollIcon } from './icons/ScrollIcon';
 import { StampIcon } from './icons/StampIcon';
 import { TrashIcon } from './icons/TrashIcon';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import Tooltip from './Tooltip';
 
 interface DashboardProps {
   documents: Document[];
@@ -78,7 +79,9 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                   <div className="flex items-center px-4 py-4 sm:px-6 w-full">
                     <div className="flex min-w-0 flex-1 items-center">
                       <div className="flex-shrink-0">
-                        <TypeIcon type={doc.type} className="h-8 w-8 text-text-secondary dark:text-text-secondary-dark group-hover:text-accent-teal dark:group-hover:text-accent-sky transition-colors" />
+                        <Tooltip text={doc.type} position="right">
+                          <TypeIcon type={doc.type} className="h-8 w-8 text-text-secondary dark:text-text-secondary-dark group-hover:text-accent-teal dark:group-hover:text-accent-sky transition-colors" />
+                        </Tooltip>
                       </div>
                       <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-3 md:gap-4">
                         <div>
@@ -106,17 +109,18 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                       </div>
                     </div>
                      <div className="flex items-center space-x-1 ml-4 flex-shrink-0">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDocToDelete(doc);
-                          }}
-                          className="p-2 rounded-full text-text-secondary dark:text-text-secondary-dark hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-                          aria-label={`Delete ${doc.name}`}
-                          title={`Delete ${doc.name}`}
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
+                        <Tooltip text={`Delete ${doc.name}`} position="left">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDocToDelete(doc);
+                            }}
+                            className="p-2 rounded-full text-text-secondary dark:text-text-secondary-dark hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                            aria-label={`Delete ${doc.name}`}
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </button>
+                        </Tooltip>
                         <div className="transform transition-transform group-hover:translate-x-1">
                           <svg className="h-5 w-5 text-accent-sky dark:text-text-secondary-dark" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                               <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />

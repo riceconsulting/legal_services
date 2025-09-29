@@ -1,5 +1,6 @@
 import React from 'react';
 import ThemeToggle from './ThemeToggle';
+import Tooltip from './Tooltip';
 
 interface HeaderProps {
     theme: 'light' | 'dark';
@@ -29,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
                         RICE AI
                     </h1>
                     <p className="font-sans text-xs sm:text-sm text-accent-teal dark:text-accent-sky tracking-wide opacity-90">
-                        Legal Service Helper
+                        AI Legal Consultant
                     </p>
                 </div>
               </a>
@@ -37,7 +38,9 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
 
           {/* Right side: Action Icons */}
           <div className="flex items-center gap-2 sm:gap-3">
-              <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+              <Tooltip text={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`} position="bottom">
+                <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+              </Tooltip>
           </div>
         </div>
       </div>

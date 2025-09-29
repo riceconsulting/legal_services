@@ -174,9 +174,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark">
+    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark">
       <Header theme={theme} toggleTheme={toggleTheme} />
-      <main className="p-4 sm:p-6 lg:p-8 pb-24">
+      <main className="flex-grow p-4 sm:p-6 lg:p-8">
         <Routes>
           <Route path="/" element={
             <div className="animate-fade-in">

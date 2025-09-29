@@ -1,6 +1,9 @@
 
+
+
+
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import type { Document, Risk, Summary, AnalysisType, QnAResponse } from '../types';
+import type { Document, Risk, Summary, AnalysisType, QnAResponse, PIIConcern } from '../types';
 import { AnalysisType as AnalysisTypeEnum } from '../types';
 import * as geminiService from '../services/geminiService';
 import Loader from './Loader';
@@ -11,6 +14,10 @@ import { TranslateIcon } from './icons/TranslateIcon';
 import { QnaIcon } from './icons/QnaIcon';
 import { ExtractIcon } from './icons/ExtractIcon';
 import { SparklesIcon } from './icons/SparklesIcon';
+import { RedactIcon } from './icons/RedactIcon';
+import DiffViewer from './DiffViewer';
+import { CompareIcon } from './icons/CompareIcon';
+import Tooltip from './Tooltip';
 
 interface DocumentViewerProps {
   document: Document;
@@ -25,6 +32,7 @@ const ANALYSIS_TITLES: Record<AnalysisType, string> = {
     [AnalysisTypeEnum.TRANSLATION]: 'Translate Document',
     [AnalysisTypeEnum.QNA]: 'Document Q&A',
     [AnalysisTypeEnum.CLAUSE_EXTRACTION]: 'Extract Clause',
+    [AnalysisTypeEnum.REDACT_PII]: 'PII Analysis',
 };
 
 const LOADING_MESSAGES: Partial<Record<AnalysisType, string>> = {
@@ -33,15 +41,17 @@ const LOADING_MESSAGES: Partial<Record<AnalysisType, string>> = {
     [AnalysisTypeEnum.TRANSLATION]: 'Translating document...',
     [AnalysisTypeEnum.QNA]: 'Searching for the answer...',
     [AnalysisTypeEnum.CLAUSE_EXTRACTION]: 'Extracting relevant clauses...',
+    [AnalysisTypeEnum.REDACT_PII]: 'Analyzing for PII...',
 };
 
 interface AnalysisPanelProps {
     type: AnalysisType | null;
     documentText: string;
     onReceiveQuote: (quote: string | null) => void;
+    onUseResultAsDraft: (newContent: string) => void;
 }
 
-const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, documentText, onReceiveQuote }) => {
+const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, documentText, onReceiveQuote, onUseResultAsDraft }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<any>(null);
@@ -81,6 +91,9 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, documentText, onRec
                 case AnalysisTypeEnum.CLAUSE_EXTRACTION:
                     if (!input) { setError("Please describe the clause to extract."); return; }
                     res = await geminiService.extractClause(documentText, input);
+                    break;
+                case AnalysisTypeEnum.REDACT_PII:
+                    res = await geminiService.redactPII(documentText);
                     break;
             }
             setResult(res);
@@ -140,6 +153,17 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, documentText, onRec
                     </div>
                 );
             }
+             if (type === AnalysisTypeEnum.REDACT_PII) {
+                return (
+                    <div className="p-6 text-center animate-fade-in space-y-4 pb-16 flex flex-col justify-center h-full">
+                        <RedactIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto" />
+                        <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Identify Personally Identifiable Information (PII) and receive advice on potential privacy risks.</p>
+                        <button onClick={() => handleAnalysis(type)} disabled={isLoading} className={commonButtonClasses}>
+                            {isLoading ? <span className="animate-pulse">Analyzing...</span> : 'Analyze for PII'}
+                        </button>
+                    </div>
+                );
+            }
             if (type === AnalysisTypeEnum.TRANSLATION) {
                 return (
                     <div className="p-4 space-y-4 animate-fade-in pb-16">
@@ -171,7 +195,32 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, documentText, onRec
                     </div>
                 );
             }
-            // For QNA and Clause Extraction, the input field is always visible, so no special "no result" screen is needed.
+            if (type === AnalysisTypeEnum.QNA) {
+                return (
+                    <div className="p-6 h-full flex flex-col items-center justify-center text-center animate-fade-in min-h-[200px]">
+                        <QnaIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
+                        <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
+                            Ask a Question
+                        </h3>
+                        <p className="mt-1 text-sm text-text-secondary dark:text-text-secondary-dark max-w-xs">
+                            Use the input above to ask specific questions about the document content.
+                        </p>
+                    </div>
+                );
+            }
+            if (type === AnalysisTypeEnum.CLAUSE_EXTRACTION) {
+                return (
+                    <div className="p-6 h-full flex flex-col items-center justify-center text-center animate-fade-in min-h-[200px]">
+                        <ExtractIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
+                        <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
+                            Extract a Clause
+                        </h3>
+                        <p className="mt-1 text-sm text-text-secondary dark:text-text-secondary-dark max-w-xs">
+                            Describe the clause you want to find in the input above.
+                        </p>
+                    </div>
+                );
+            }
             return null;
         }
 
@@ -218,6 +267,20 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, documentText, onRec
                 );
             case AnalysisTypeEnum.TRANSLATION:
                  return <div className="p-4 animate-fade-in pb-16"><pre className="whitespace-pre-wrap font-sans text-sm text-text-primary dark:text-text-primary-dark">{result}</pre></div>;
+            case AnalysisTypeEnum.REDACT_PII:
+                const piiConcerns: PIIConcern[] = result;
+                 if (!Array.isArray(piiConcerns) || piiConcerns.length === 0) return <div className="p-4 text-green-600 dark:text-green-400 animate-fade-in">No Personally Identifiable Information (PII) found.</div>;
+                return (
+                    <div className="p-4 space-y-4 animate-fade-in pb-16">
+                        {piiConcerns.map((item, index) => (
+                             <div key={item.id || `pii-${index}`} className="bg-background-light dark:bg-background-dark p-4 rounded-lg border border-border-light dark:border-border-dark">
+                                <p className="text-text-primary dark:text-text-primary-dark font-semibold">{item.concern}</p>
+                                <blockquote className="border-l-4 border-accent-sky dark:border-accent-teal pl-3 my-2 text-sm text-text-secondary dark:text-text-secondary-dark italic">"{item.pii}"</blockquote>
+                                <p className="text-sm"><span className="font-semibold text-green-600 dark:text-green-400">Recommendation:</span> <span className="text-text-primary dark:text-text-primary-dark">{item.recommendation}</span></p>
+                            </div>
+                        ))}
+                    </div>
+                );
             case AnalysisTypeEnum.QNA:
                 const qnaResponse: QnAResponse = result;
                 return (
@@ -279,6 +342,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, onBack, onSav
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState('');
   const [highlightedQuote, setHighlightedQuote] = useState<string | null>(null);
+  const [isComparing, setIsComparing] = useState(false);
 
   const documentContentRef = React.useRef<HTMLDivElement>(null);
   
@@ -333,23 +397,32 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, onBack, onSav
     onSaveDraft(document.id, editedContent);
     // Optionally, you can add a visual confirmation here
   };
+  
+  const handleUseAsDraft = (content: string) => {
+    setEditedContent(content);
+    setIsEditing(true);
+    setActiveTab(null);
+  };
+
 
   const handleQuote = (quote: string | null) => {
     setHighlightedQuote(quote);
   };
 
-  const AnalysisButton = ({ type, icon, label }: {type: AnalysisType, icon: React.ReactNode, label: string}) => (
-     <button 
-        onClick={() => setActiveTab(type)} 
-        className={`group relative flex flex-col items-center justify-center p-3 space-y-1 w-full text-center rounded-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-surface-dark focus:ring-accent-teal dark:focus:ring-accent-sky ${
-        activeTab === type 
-        ? 'bg-gradient-to-br from-accent-teal to-sky-600 text-white dark:from-accent-sky dark:to-accent-teal dark:text-white shadow-xl scale-105' 
-        : 'bg-background-light dark:bg-surface-dark/50 hover:bg-accent-sky/30 dark:hover:bg-accent-teal/20 text-text-secondary dark:text-text-secondary-dark'
-        }`}
-    >
-        {icon}
-        <span className="text-xs font-medium">{label}</span>
-    </button>
+  const AnalysisButton = ({ type, icon, label, tooltipText }: { type: AnalysisType, icon: React.ReactNode, label: string, tooltipText: string }) => (
+    <Tooltip text={tooltipText} position="top">
+        <button 
+            onClick={() => setActiveTab(type)} 
+            className={`group relative flex flex-col items-center justify-center p-3 space-y-1 w-full text-center rounded-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-surface-dark focus:ring-accent-teal dark:focus:ring-accent-sky ${
+            activeTab === type 
+            ? 'bg-gradient-to-br from-accent-teal to-sky-600 text-white dark:from-accent-sky dark:to-accent-teal dark:text-white shadow-xl scale-105' 
+            : 'bg-background-light dark:bg-surface-dark/50 hover:bg-accent-sky/30 dark:hover:bg-accent-teal/20 text-text-secondary dark:text-text-secondary-dark'
+            }`}
+        >
+            {icon}
+            <span className="text-xs font-medium">{label}</span>
+        </button>
+    </Tooltip>
   );
 
   const renderedContent = useMemo(() => {
@@ -371,12 +444,21 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, onBack, onSav
 
   return (
     <div className="flex flex-col">
+        {isComparing && (
+            <DiffViewer 
+                doc={document} 
+                baseVersionIndex={selectedVersionIndex} 
+                onClose={() => setIsComparing(false)} 
+            />
+        )}
         <div className="flex-shrink-0 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center justify-between w-full sm:w-auto">
-                <button onClick={onBack} className="flex items-center text-text-secondary dark:text-text-secondary-dark hover:text-text-primary dark:hover:text-text-primary-dark transition-colors duration-200">
-                    <BackIcon className="h-5 w-5 mr-2" />
-                    <span className="hidden sm:inline">Back to Dashboard</span>
-                </button>
+                <Tooltip text="Back to Dashboard" position="right">
+                    <button onClick={onBack} className="flex items-center text-text-secondary dark:text-text-secondary-dark hover:text-text-primary dark:hover:text-text-primary-dark transition-colors duration-200">
+                        <BackIcon className="h-5 w-5 mr-2" />
+                        <span className="hidden sm:inline">Back</span>
+                    </button>
+                </Tooltip>
                  <h1 className="font-heading text-xl lg:text-2xl font-bold text-text-primary dark:text-text-primary-dark truncate text-center flex-1 min-w-0 sm:hidden mx-2">{document.name}</h1>
             </div>
              <h1 className="font-heading hidden sm:block text-xl lg:text-2xl font-bold text-text-primary dark:text-text-primary-dark truncate text-center flex-1 min-w-0">{document.name}</h1>
@@ -393,6 +475,16 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, onBack, onSav
                     </option>
                   ))}
                 </select>
+                <Tooltip text="Compare document versions" position="left">
+                    <button
+                        onClick={() => setIsComparing(true)}
+                        disabled={isEditing || document.versions.length < 2}
+                        className="p-2 rounded-md bg-background-main dark:bg-surface-dark border border-gray-300 dark:border-border-dark text-text-primary dark:text-text-primary-dark hover:bg-background-light dark:hover:bg-background-dark/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        aria-label="Compare versions"
+                    >
+                        <CompareIcon className="h-5 w-5" />
+                    </button>
+                </Tooltip>
             </div>
         </div>
 
@@ -404,12 +496,20 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, onBack, onSav
                     <div className="flex items-center gap-2">
                       {isEditing ? (
                         <>
-                          <button onClick={handleCancel} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded text-sm transition-all transform hover:scale-105 active:scale-95">Cancel</button>
-                          <button onClick={handleSaveDraft} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded text-sm transition-all transform hover:scale-105 active:scale-95">Save Draft</button>
-                          <button onClick={handleSave} className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded text-sm transition-all transform hover:scale-105 active:scale-95">Save as New Version</button>
+                          <Tooltip text="Discard changes" position="bottom">
+                            <button onClick={handleCancel} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded text-sm transition-all transform hover:scale-105 active:scale-95">Cancel</button>
+                          </Tooltip>
+                          <Tooltip text="Save your changes as a local draft" position="bottom">
+                           <button onClick={handleSaveDraft} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded text-sm transition-all transform hover:scale-105 active:scale-95">Save Draft</button>
+                          </Tooltip>
+                          <Tooltip text="Finalize changes and save as a new official version" position="bottom">
+                            <button onClick={handleSave} className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded text-sm transition-all transform hover:scale-105 active:scale-95">Save as New Version</button>
+                          </Tooltip>
                         </>
                       ) : (
-                        <button onClick={handleEdit} className="bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:hover:bg-opacity-90 dark:text-primary-navy text-white font-bold py-1 px-3 rounded text-sm transition-all transform hover:scale-105 active:scale-95">Edit</button>
+                        <Tooltip text="Edit document content" position="bottom">
+                            <button onClick={handleEdit} className="bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:hover:bg-opacity-90 dark:text-primary-navy text-white font-bold py-1 px-3 rounded text-sm transition-all transform hover:scale-105 active:scale-95">Edit</button>
+                        </Tooltip>
                       )}
                     </div>
                 </div>
@@ -429,16 +529,17 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, onBack, onSav
              {/* Right Pane: AI Toolkit */}
             <div className="lg:w-full lg:max-w-md xl:max-w-lg lg:flex-shrink-0 bg-background-main dark:bg-surface-dark rounded-lg shadow-lg overflow-hidden flex flex-col">
                 <div className="p-4 border-b border-border-light dark:border-border-dark">
-                     <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-3 gap-2">
-                        <AnalysisButton type={AnalysisTypeEnum.SUMMARY} icon={<SummaryIcon className="h-6 w-6 transform transition-transform duration-200 group-hover:scale-110"/>} label="Summary" />
-                        <AnalysisButton type={AnalysisTypeEnum.RISK_ANALYSIS} icon={<RiskIcon className="h-6 w-6 transform transition-transform duration-200 group-hover:scale-110"/>} label="Risks" />
-                        <AnalysisButton type={AnalysisTypeEnum.CLAUSE_EXTRACTION} icon={<ExtractIcon className="h-6 w-6 transform transition-transform duration-200 group-hover:scale-110"/>} label="Extract" />
-                        <AnalysisButton type={AnalysisTypeEnum.TRANSLATION} icon={<TranslateIcon className="h-6 w-6 transform transition-transform duration-200 group-hover:scale-110"/>} label="Translate" />
-                        <AnalysisButton type={AnalysisTypeEnum.QNA} icon={<QnaIcon className="h-6 w-6 transform transition-transform duration-200 group-hover:scale-110"/>} label="Q&A" />
+                     <div className="grid grid-cols-3 gap-2">
+                        <AnalysisButton type={AnalysisTypeEnum.SUMMARY} icon={<SummaryIcon className="h-6 w-6 transform transition-transform duration-200 group-hover:scale-110"/>} label="Summary" tooltipText="Get a high-level overview and identify key clauses." />
+                        <AnalysisButton type={AnalysisTypeEnum.RISK_ANALYSIS} icon={<RiskIcon className="h-6 w-6 transform transition-transform duration-200 group-hover:scale-110"/>} label="Risks" tooltipText="Identify potential legal risks, ambiguities, and missing clauses." />
+                        <AnalysisButton type={AnalysisTypeEnum.REDACT_PII} icon={<RedactIcon className="h-6 w-6 transform transition-transform duration-200 group-hover:scale-110"/>} label="PII Analysis" tooltipText="Identify Personally Identifiable Information (PII) and potential privacy risks." />
+                        <AnalysisButton type={AnalysisTypeEnum.CLAUSE_EXTRACTION} icon={<ExtractIcon className="h-6 w-6 transform transition-transform duration-200 group-hover:scale-110"/>} label="Extract" tooltipText="Pull out specific clauses based on a description." />
+                        <AnalysisButton type={AnalysisTypeEnum.TRANSLATION} icon={<TranslateIcon className="h-6 w-6 transform transition-transform duration-200 group-hover:scale-110"/>} label="Translate" tooltipText="Translate the document into English or Bahasa Indonesia." />
+                        <AnalysisButton type={AnalysisTypeEnum.QNA} icon={<QnaIcon className="h-6 w-6 transform transition-transform duration-200 group-hover:scale-110"/>} label="Q&A" tooltipText="Ask specific questions about the document's content." />
                     </div>
                 </div>
                 <div className="flex-grow overflow-hidden">
-                    <AnalysisPanel type={activeTab} documentText={currentVersion.content} onReceiveQuote={handleQuote} />
+                    <AnalysisPanel type={activeTab} documentText={currentVersion.content} onReceiveQuote={handleQuote} onUseResultAsDraft={handleUseAsDraft} />
                 </div>
             </div>
         </div>

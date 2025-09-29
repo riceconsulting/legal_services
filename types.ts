@@ -20,6 +20,13 @@ export interface Risk {
   recommendation: string;
 }
 
+export interface PIIConcern {
+  id: string;
+  pii: string;
+  concern: string;
+  recommendation: string;
+}
+
 export interface Summary {
     executive: string;
     keyClauses: { title: string; detail: string }[];
@@ -36,4 +43,5 @@ export enum AnalysisType {
     CLAUSE_EXTRACTION = 'clause_extraction',
     TRANSLATION = 'translation',
     QNA = 'qna',
+    REDACT_PII = 'redact_pii',
 }

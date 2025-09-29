@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RICE AI - Legal Service Helper</title>
+    <title>RICE AI - AI Legal Consultant</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
@@ -18,11 +18,18 @@
         from { opacity: 0; transform: translateY(-20px); }
         to { opacity: 1; transform: translateY(0); }
       }
+      @keyframes tooltip-fade-in {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
       .animate-fade-in {
         animation: fadeIn 0.5s ease-out forwards;
       }
       .animate-slide-in-down {
         animation: slideInDown 0.5s ease-out forwards;
+      }
+      .animate-tooltip-fade-in {
+        animation: tooltip-fade-in 0.15s ease-out forwards;
       }
     </style>
     <script>
@@ -72,6 +79,7 @@
     "react/": "https://aistudiocdn.com/react@^19.1.1/",
     "react": "https://aistudiocdn.com/react@^19.1.1",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.1.1",
     "react-router-dom": "https://aistudiocdn.com/react-router-dom@^6.25.1",
     "react-window": "https://aistudiocdn.com/react-window@^1.8.10"
   }

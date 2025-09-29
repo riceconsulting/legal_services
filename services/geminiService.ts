@@ -1,7 +1,7 @@
 
 
 import { GoogleGenAI, Type } from "@google/genai";
-import type { Risk, Summary, QnAResponse } from '../types';
+import type { Risk, Summary, QnAResponse, PIIConcern } from '../types';
 
 const API_KEY = process.env.API_KEY;
 
@@ -78,7 +78,7 @@ export const extractTextFromFile = async (base64Data: string, mimeType: string):
 
 export const generateSummary = async (documentText: string): Promise<Summary> => {
     const prompt = `
-    You are an expert Indonesian legal assistant. Analyze the following legal document and provide two summaries in Bahasa Indonesia:
+    You are an expert Indonesian legal consultant. Analyze the following legal document and provide two summaries in Bahasa Indonesia:
     1. An "Executive Summary" that gives a high-level overview of the document's purpose, parties involved, and key outcomes.
     2. A "Key Clauses & Terms" summary presented as a structured list, identifying essential Indonesian legal concepts like payment terms, termination clauses, object of the agreement, etc.
 
@@ -123,7 +123,7 @@ export const generateSummary = async (documentText: string): Promise<Summary> =>
 
 export const analyzeRisks = async (documentText: string): Promise<Risk[]> => {
     const prompt = `
-    You are a senior Indonesian legal professional. Analyze the provided legal document. 
+    You are a senior Indonesian legal consultant. Analyze the provided legal document. 
     Act as a "second pair of eyes" to identify potential risks, missing clauses, unusual provisions, and compliance issues against Indonesian law (e.g., UU ITE, UU Cipta Kerja, OJK regulations).
     For each issue found, provide a risk level (High, Medium, Low, Info), a description of the issue, the relevant clause, and a concrete recommendation for improvement.
 
@@ -202,7 +202,7 @@ export const translateText = async (documentText: string, targetLanguage: 'engli
 
 export const answerQuestion = async (documentText: string, question: string): Promise<QnAResponse> => {
     const prompt = `
-    You are a helpful Q&A assistant for legal documents. Answer the following question based ONLY on the provided document text. 
+    You are an expert Indonesian legal consultant. Answer the following question based ONLY on the provided document text. 
     Provide a direct answer in Bahasa Indonesia and include the exact, verbatim quote from the document that contains the answer.
     If the answer is not in the document, state that clearly in the 'answer' field and leave the 'quote' field empty.
 
@@ -257,5 +257,62 @@ export const extractClause = async (documentText: string, clauseDescription: str
         return response.text;
     } catch (error) {
         throw handleApiError(error, 'extractClause');
+    }
+};
+
+export const redactPII = async (documentText: string): Promise<PIIConcern[]> => {
+    const prompt = `
+    You are an expert Indonesian legal consultant specializing in data privacy.
+    Your task is to analyze the following document and identify all Personally Identifiable Information (PII) without redacting the document itself.
+    For each piece of PII found, identify the text, explain the potential risk or concern associated with its presence, and provide a clear recommendation.
+    
+    PII to look for includes, but is not limited to:
+    - Full names of individuals (e.g., Budi Santoso, Citra Lestari)
+    - National Identity Numbers (Nomor KTP)
+    - Taxpayer Identification Numbers (NPWP)
+    - Phone numbers
+    - Email addresses
+    - Physical addresses
+    - Bank account numbers
+    - Signatures or references to signatures
+
+    Do NOT redact or change the original document. Only identify the PII and explain the associated risks.
+    Return ONLY a JSON array of objects. Each object should represent one piece of identified PII and its analysis. If no PII is found, return an empty array [].
+
+    DOCUMENT:
+    ---
+    ${documentText}
+    ---
+    `;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: model,
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            id: { type: Type.STRING, description: "A unique identifier for the PII concern" },
+                            pii: { type: Type.STRING, description: "The exact PII text found in the document." },
+                            concern: { type: Type.STRING, description: "The privacy or legal concern related to this PII." },
+                            recommendation: { type: Type.STRING, description: "Recommendation on how to handle this PII (e.g., 'Consider redacting before sharing externally')." },
+                        },
+                        required: ["id", "pii", "concern", "recommendation"]
+                    },
+                },
+            }
+        });
+        const jsonStr = response.text.trim();
+        const cleanedJsonStr = jsonStr.replace(/^```json\s*|```\s*$/g, '');
+        if (!cleanedJsonStr) {
+          return [];
+        }
+        return JSON.parse(cleanedJsonStr) as PIIConcern[];
+    } catch (error) {
+        throw handleApiError(error, 'redactPII');
     }
 };
