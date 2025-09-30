@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo } from 'react';
 import type { Document } from '../types';
 import FileUpload from './FileUpload';
@@ -27,6 +28,7 @@ const TypeIcon: React.FC<{ type: string; className: string }> = ({ type, classNa
     case lowercasedType.includes('putusan'):
       return <GavelIcon className={className} />;
     case lowercasedType.includes('akta'):
+    case lowercasedType.includes('kuasa'):
       return <StampIcon className={className} />;
     case lowercasedType.includes('perjanjian'):
       return <ScrollIcon className={className} />;
