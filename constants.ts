@@ -1,4 +1,3 @@
-
 import type { Document } from './types';
 
 const SAMPLE_DOCUMENT_CONTENT_1 = `PERJANJIAN KERJASAMA PEMASARAN
@@ -194,52 +193,28 @@ export const MOCK_DOCUMENTS: Document[] = [
         id: 'doc-sample-4',
         name: '[SAMPLE] Putusan Pengadilan Negeri.txt',
         type: 'Putusan Pengadilan',
-        versions: [
-            {
-                version: 1,
-                date: '2024-06-25',
-                content: SAMPLE_DOCUMENT_CONTENT_4
-            }
-        ],
-        draftContent: null,
+        date: '2024-06-25',
+        content: SAMPLE_DOCUMENT_CONTENT_4
     },
     {
         id: 'doc-sample-3',
         name: '[SAMPLE] Akta Jual Beli Tanah.txt',
         type: 'Akta Jual Beli',
-        versions: [
-            {
-                version: 1,
-                date: '2024-06-12',
-                content: SAMPLE_DOCUMENT_CONTENT_3
-            }
-        ],
-        draftContent: null,
+        date: '2024-06-12',
+        content: SAMPLE_DOCUMENT_CONTENT_3
     },
     {
         id: 'doc-sample-2',
         name: '[SAMPLE] Surat Kuasa Khusus.txt',
         type: 'Surat Kuasa',
-        versions: [
-            {
-                version: 1,
-                date: '2024-06-10',
-                content: SAMPLE_DOCUMENT_CONTENT_2
-            }
-        ],
-        draftContent: null,
+        date: '2024-06-10',
+        content: SAMPLE_DOCUMENT_CONTENT_2
     },
     {
         id: 'doc-sample-1',
         name: '[SAMPLE] Perjanjian Kerjasama Pemasaran.txt',
         type: 'Perjanjian Kerjasama',
-        versions: [
-            {
-                version: 1,
-                date: '2024-05-27',
-                content: SAMPLE_DOCUMENT_CONTENT_1
-            }
-        ],
-        draftContent: null,
+        date: '2024-05-27',
+        content: SAMPLE_DOCUMENT_CONTENT_1
     }
 ];

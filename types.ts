@@ -1,15 +1,9 @@
-export interface Version {
-  version: number;
-  date: string;
-  content: string;
-}
-
 export interface Document {
   id: string;
   name: string;
   type: string;
-  versions: Version[];
-  draftContent?: string | null;
+  date: string;
+  content: string;
 }
 
 export interface Risk {

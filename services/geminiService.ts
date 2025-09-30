@@ -38,9 +38,15 @@ const handleApiError = (error: any, functionName: string): Error => {
             // Fall through if parsing fails
         }
     }
+
+    // Handle JSON parsing errors specifically for better user feedback
+    if (error instanceof SyntaxError && error.message.toLowerCase().includes('json')) {
+        return new Error("The AI returned an invalid response format. It was expected to be JSON, but something went wrong. Please try again.");
+    }
     
-    // Check for standard JS Error object for other issues (e.g., our own JSON.parse failing)
+    // Check for standard JS Error object for other issues (e.g., our own custom errors)
     if (error instanceof Error) {
+        // A more generic JSON error check, just in case
         if (error.message.toLowerCase().includes('json')) {
              return new Error("Failed to process the AI's response. The format was unexpected.");
         }
@@ -78,9 +84,13 @@ export const extractTextFromFile = async (base64Data: string, mimeType: string):
 
 export const generateSummary = async (documentText: string): Promise<Summary> => {
     const prompt = `
-    You are an expert Indonesian legal consultant. Analyze the following legal document and provide two summaries in Bahasa Indonesia:
-    1. An "Executive Summary" that gives a high-level overview of the document's purpose, parties involved, and key outcomes.
-    2. A "Key Clauses & Terms" summary presented as a structured list, identifying essential Indonesian legal concepts like payment terms, termination clauses, object of the agreement, etc.
+    As an expert Indonesian legal analyst, your task is to meticulously analyze the following legal document. Base your analysis STRICTLY on the text provided. Do not infer or add information not present in the document.
+
+    Provide the following two summaries in Bahasa Indonesia:
+    1.  **Executive Summary**: A concise overview of the document's main purpose, the parties involved, and the primary legal outcomes or obligations.
+    2.  **Key Clauses & Terms**: A structured list identifying and explaining the most critical clauses. Focus on Indonesian legal concepts such as payment terms (ketentuan pembayaran), termination clauses (klausul pengakhiran), object of the agreement (objek perjanjian), dispute resolution (penyelesaian sengketa), etc.
+
+    If a standard clause is missing, do not invent it. Your output must be grounded exclusively in the provided text.
 
     DOCUMENT:
     ---
@@ -115,6 +125,9 @@ export const generateSummary = async (documentText: string): Promise<Summary> =>
             }
         });
         const text = response.text.trim().replace(/^```json\s*|```\s*$/g, '');
+        if (!text) {
+            throw new Error("The AI returned an empty summary. Please try again.");
+        }
         return JSON.parse(text) as Summary;
     } catch (error) {
         throw handleApiError(error, 'generateSummary');
@@ -123,11 +136,19 @@ export const generateSummary = async (documentText: string): Promise<Summary> =>
 
 export const analyzeRisks = async (documentText: string): Promise<Risk[]> => {
     const prompt = `
-    You are a senior Indonesian legal consultant. Analyze the provided legal document. 
-    Act as a "second pair of eyes" to identify potential risks, missing clauses, unusual provisions, and compliance issues against Indonesian law (e.g., UU ITE, UU Cipta Kerja, OJK regulations).
-    For each issue found, provide a risk level (High, Medium, Low, Info), a description of the issue, the relevant clause, and a concrete recommendation for improvement.
+    As a senior Indonesian legal risk analyst, your task is to conduct a thorough risk assessment of the following legal document. Your analysis must be objective and based ONLY on the provided text and your knowledge of Indonesian law (e.g., UU ITE, UU Cipta Kerja, KUHPerdata, OJK regulations).
 
-    Return ONLY a JSON array of objects, where each object represents a single identified risk. If no risks are found, return an empty array [].
+    Identify potential risks, ambiguities, missing clauses that are standard for this type of document, unusual provisions, and potential compliance issues.
+    
+    For each identified issue, you must:
+    1.  Quote the specific clause or explicitly state if a clause is missing.
+    2.  Provide a clear, concise description of the risk.
+    3.  Assign a risk level: 'High', 'Medium', 'Low', or 'Info'.
+    4.  Offer a concrete, actionable recommendation for mitigation or improvement.
+
+    Do not invent risks or speculate beyond the document's content. If no significant risks are found, return an empty array [].
+
+    Return ONLY a valid JSON array of objects.
 
     DOCUMENT:
     ---
@@ -177,11 +198,14 @@ export const analyzeRisks = async (documentText: string): Promise<Risk[]> => {
 
 export const translateText = async (documentText: string, targetLanguage: 'english' | 'bahasa indonesia'): Promise<string> => {
     const prompt = `
-    As an expert legal translator, translate the following legal document to ${targetLanguage}. 
-    Your task is to provide a clean, direct translation.
-    - Accurately translate complex legal jargon and structures.
-    - Maintain the original legal intent and nuance.
-    - IMPORTANT: Return ONLY the translated text. Do not include any introductory phrases, explanations, markdown formatting (like '---'), or any content other than the direct translation of the document.
+    You are an expert legal translator specializing in Indonesian and English legal documents. Your task is to perform a high-fidelity translation of the following text into ${targetLanguage}.
+
+    Your translation must:
+    1.  Be precise and accurate, correctly translating complex legal terminology and sentence structures.
+    2.  Preserve the original legal meaning, intent, and nuance without adding any interpretation.
+    3.  Maintain the document's original formatting (paragraphs, lists, etc.) as closely as possible.
+
+    CRITICAL: Your output must contain ONLY the translated text. Do not include any introductory phrases, explanations, markdown, or any content other than the direct translation.
 
     DOCUMENT TO TRANSLATE:
     ---
@@ -202,9 +226,13 @@ export const translateText = async (documentText: string, targetLanguage: 'engli
 
 export const answerQuestion = async (documentText: string, question: string): Promise<QnAResponse> => {
     const prompt = `
-    You are an expert Indonesian legal consultant. Answer the following question based ONLY on the provided document text. 
-    Provide a direct answer in Bahasa Indonesia and include the exact, verbatim quote from the document that contains the answer.
-    If the answer is not in the document, state that clearly in the 'answer' field and leave the 'quote' field empty.
+    As an AI legal assistant, your task is to answer a specific question based SOLELY on the content of the provided legal document. You must not use any external knowledge or make assumptions.
+
+    1.  Read the user's question carefully.
+    2.  Search the document for the information needed to answer the question.
+    3.  If a direct answer is found, provide a concise answer in Bahasa Indonesia.
+    4.  Then, you MUST provide the exact, verbatim quote from the document that directly supports your answer.
+    5.  If the information to answer the question is NOT present in the document, you MUST state "Informasi tidak ditemukan di dalam dokumen." in the 'answer' field and leave the 'quote' field empty. Do not attempt to guess or infer an answer.
 
     DOCUMENT:
     ---
@@ -232,6 +260,9 @@ export const answerQuestion = async (documentText: string, question: string): Pr
             }
         });
         const jsonStr = response.text.trim().replace(/^```json\s*|```\s*$/g, '');
+        if (!jsonStr) {
+            throw new Error("The AI returned an empty answer. Please try again.");
+        }
         return JSON.parse(jsonStr) as QnAResponse;
     } catch (error) {
         throw handleApiError(error, 'answerQuestion');
@@ -240,8 +271,12 @@ export const answerQuestion = async (documentText: string, question: string): Pr
 
 export const extractClause = async (documentText: string, clauseDescription: string): Promise<string> => {
     const prompt = `
-    From the legal document provided below, find and extract the exact clause(s) related to "${clauseDescription}".
-    If you find the clause, return it. If not, state that the clause could not be found.
+    Your task is to act as a clause extraction tool. From the legal document provided, find and extract the verbatim clause(s) that are most relevant to the following description: "${clauseDescription}".
+
+    - Search the entire document for the most relevant section(s).
+    - Return ONLY the exact text of the clause(s) you find. Include the full paragraph or section.
+    - If no relevant clause is found after a thorough search, return the exact string: "Klausul yang relevan tidak dapat ditemukan di dalam dokumen."
+    - Do not summarize, explain, or add any text other than the extracted clause or the "not found" message.
 
     DOCUMENT:
     ---
@@ -262,22 +297,26 @@ export const extractClause = async (documentText: string, clauseDescription: str
 
 export const redactPII = async (documentText: string): Promise<PIIConcern[]> => {
     const prompt = `
-    You are an expert Indonesian legal consultant specializing in data privacy.
-    Your task is to analyze the following document and identify all Personally Identifiable Information (PII) without redacting the document itself.
-    For each piece of PII found, identify the text, explain the potential risk or concern associated with its presence, and provide a clear recommendation.
-    
-    PII to look for includes, but is not limited to:
+    As an AI data privacy analyst for Indonesian legal documents, your task is to meticulously scan the following document and identify all instances of Personally Identifiable Information (PII). Your analysis must be based strictly on the text provided.
+
+    Do NOT redact or alter the document. Your goal is to identify and report on the PII found.
+
+    For each piece of PII identified, you must provide:
+    1.  \`pii\`: The exact, verbatim text of the PII found.
+    2.  \`concern\`: A brief explanation of the privacy or security risk associated with this piece of data being exposed.
+    3.  \`recommendation\`: An actionable recommendation, such as "Consider redacting before external sharing" or "Verify if this information is necessary for the document's purpose."
+
+    Search for, but do not limit your search to:
     - Full names of individuals (e.g., Budi Santoso, Citra Lestari)
-    - National Identity Numbers (Nomor KTP)
+    - National Identity Numbers (Nomor Induk Kependudukan / KTP)
     - Taxpayer Identification Numbers (NPWP)
     - Phone numbers
     - Email addresses
-    - Physical addresses
+    - Complete physical addresses
     - Bank account numbers
-    - Signatures or references to signatures
+    - Signature placeholders or names associated with signatures
 
-    Do NOT redact or change the original document. Only identify the PII and explain the associated risks.
-    Return ONLY a JSON array of objects. Each object should represent one piece of identified PII and its analysis. If no PII is found, return an empty array [].
+    Return ONLY a valid JSON array of objects. If no PII is found after a thorough analysis, return an empty array [].
 
     DOCUMENT:
     ---

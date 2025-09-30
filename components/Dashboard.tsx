@@ -1,5 +1,3 @@
-
-
 import React, { useState, useMemo } from 'react';
 import type { Document } from '../types';
 import FileUpload from './FileUpload';
@@ -51,9 +49,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
     return documents.filter(doc => {
       const inName = doc.name.toLowerCase().includes(lowercasedQuery);
       const inType = doc.type.toLowerCase().includes(lowercasedQuery);
-      const inContent = doc.versions.some(version =>
-        version.content.toLowerCase().includes(lowercasedQuery)
-      );
+      const inContent = doc.content.toLowerCase().includes(lowercasedQuery);
       return inName || inType || inContent;
     });
   }, [documents, searchQuery]);
@@ -67,8 +63,6 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
   
   const DocumentRow: React.FC<ListChildComponentProps> = ({ index, style }) => {
       const doc = filteredDocuments[index];
-      const latestVersion = doc.versions[0];
-      if (!latestVersion) return null;
 
       return (
           <div style={style}>
@@ -85,13 +79,10 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                           <TypeIcon type={doc.type} className="h-8 w-8 text-text-secondary dark:text-text-secondary-dark group-hover:text-accent-teal dark:group-hover:text-accent-sky transition-colors" />
                         </Tooltip>
                       </div>
-                      <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-3 md:gap-4">
+                      <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                         <div>
                            <div className="flex items-center">
                             <p className="truncate font-medium text-text-primary dark:text-text-primary-dark">{doc.name}</p>
-                            {doc.draftContent && (
-                                <span className="ml-2 inline-flex items-center rounded-full bg-yellow-500/20 px-2 py-1 text-xs font-medium text-yellow-600 dark:text-yellow-400">Draft</span>
-                            )}
                           </div>
                           <p className="mt-1 flex items-center text-sm text-text-secondary dark:text-text-secondary-dark">
                             {doc.type}
@@ -100,12 +91,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                         <div className="hidden md:block">
                           <p className="text-sm text-text-secondary dark:text-text-secondary-dark">
                             Last Modified:{' '}
-                            <time dateTime={latestVersion.date}>{latestVersion.date}</time>
-                          </p>
-                        </div>
-                        <div className="hidden md:block">
-                          <p className="text-sm text-text-secondary dark:text-text-secondary-dark">
-                            Version: {latestVersion.version}
+                            <time dateTime={doc.date}>{doc.date}</time>
                           </p>
                         </div>
                       </div>

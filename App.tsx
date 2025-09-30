@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
-import type { Document, Version } from './types';
+import type { Document } from './types';
 import Dashboard from './components/Dashboard';
 import DocumentViewer from './components/DocumentViewer';
 import Header from './components/Header';
@@ -78,18 +77,12 @@ const App: React.FC = () => {
             return;
         }
 
-        const firstVersion: Version = {
-            version: 1,
-            date: new Date().toISOString().split('T')[0],
-            content: fileContent,
-        };
-
         const newDoc: Document = {
             id: `doc-${Date.now()}`,
             name: file.name,
             type: 'Perjanjian Kerjasama', // This could be inferred or asked
-            versions: [firstVersion],
-            draftContent: null,
+            date: new Date().toISOString().split('T')[0],
+            content: fileContent,
         };
         
         setDocuments(prevDocs => [newDoc, ...prevDocs]);
@@ -100,42 +93,6 @@ const App: React.FC = () => {
     } finally {
         setIsUploading(false);
     }
-  };
-
-
-  const handleSaveNewVersion = (documentId: string, newContent: string) => {
-    setDocuments(prevDocs => {
-      return prevDocs.map(doc => {
-        if (doc.id === documentId) {
-          const latestVersionNumber = doc.versions[0]?.version || 0;
-          const newVersion: Version = {
-            version: latestVersionNumber + 1,
-            date: new Date().toISOString().split('T')[0],
-            content: newContent,
-          };
-          return {
-            ...doc,
-            versions: [newVersion, ...doc.versions],
-            draftContent: null, // Clear draft when a new version is saved
-          };
-        }
-        return doc;
-      });
-    });
-  };
-
-  const handleSaveDraft = (documentId: string, draftContent: string) => {
-    setDocuments(prevDocs => {
-      return prevDocs.map(doc => {
-        if (doc.id === documentId) {
-           return {
-            ...doc,
-            draftContent: draftContent,
-          };
-        }
-        return doc;
-      });
-    });
   };
 
   const handleDeleteDocument = (documentId: string) => {
@@ -166,8 +123,6 @@ const App: React.FC = () => {
                 key={document.id}
                 document={document} 
                 onBack={() => navigate('/')} 
-                onSaveNewVersion={handleSaveNewVersion}
-                onSaveDraft={handleSaveDraft}
             />
         </div>
     );
