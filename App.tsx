@@ -30,8 +30,8 @@ const App: React.FC = () => {
         return storedLang;
       }
     }
-    // Default to English if no preference is stored
-    return 'en';
+    // Default to Bahasa Indonesia if no preference is stored
+    return 'id';
   });
 
   const t = useMemo(() => translations[language], [language]);

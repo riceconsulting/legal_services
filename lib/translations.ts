@@ -4,8 +4,8 @@ export const translations = {
     switchLanguage: 'Ganti Bahasa (Switch Language)',
     switchTheme: (theme: 'light' | 'dark') => `Switch to ${theme === 'light' ? 'dark' : 'light'} mode`,
     // Dashboard
-    dashboardTitle: 'Welcome, Counsel',
-    dashboardSubtitle: 'Manage your legal documents with the power of AI.',
+    dashboardTitle: 'Legal Document Analysis',
+    dashboardSubtitle: 'Upload a document to summarize, identify risks, and ask questions with AI.',
     recentProjects: 'Recent Projects',
     searchPlaceholder: 'Search by name, type, or keyword...',
     lastModified: 'Last Modified',
@@ -76,8 +76,8 @@ export const translations = {
     switchLanguage: 'Switch Language (Ganti Bahasa)',
     switchTheme: (theme: 'light' | 'dark') => `Beralih ke mode ${theme === 'light' ? 'gelap' : 'terang'}`,
     // Dashboard
-    dashboardTitle: 'Selamat Datang, Counsel',
-    dashboardSubtitle: 'Kelola dokumen hukum Anda dengan kekuatan AI.',
+    dashboardTitle: 'Analisis Dokumen Hukum',
+    dashboardSubtitle: 'Unggah dokumen untuk meringkas, mengidentifikasi risiko, dan mengajukan pertanyaan dengan AI.',
     recentProjects: 'Proyek Terkini',
     searchPlaceholder: 'Cari berdasarkan nama, jenis, atau kata kunci...',
     lastModified: 'Terakhir Diubah',
