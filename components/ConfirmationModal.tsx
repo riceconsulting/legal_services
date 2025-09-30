@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { translations } from '../lib/translations';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -7,6 +7,7 @@ interface ConfirmationModalProps {
   onConfirm: () => void;
   title: string;
   children: React.ReactNode;
+  language: 'en' | 'id';
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -15,8 +16,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   title,
   children,
+  language
 }) => {
   if (!isOpen) return null;
+
+  const t = translations[language];
 
   return (
     <div
@@ -45,13 +49,13 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 rounded-md text-sm font-semibold bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-text-primary dark:text-text-primary-dark transition-colors"
           >
-            Cancel
+            {t.cancel}
           </button>
           <button
             onClick={onConfirm}
             className="px-4 py-2 rounded-md text-sm font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-surface-dark"
           >
-            Delete
+            {t.delete}
           </button>
         </div>
       </div>

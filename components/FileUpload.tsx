@@ -1,16 +1,18 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { UploadIcon } from './icons/UploadIcon';
 import Loader from './Loader';
+import { translations } from '../lib/translations';
 
 interface FileUploadProps {
   onFileUpload: (file: File) => void;
   isProcessing: boolean;
+  language: 'en' | 'id';
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isProcessing }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isProcessing, language }) => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const t = translations[language];
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     if (isProcessing) return;
@@ -65,15 +67,15 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isProcessing }) =
       onClick={handleClick}
     >
       {isProcessing ? (
-        <Loader text="AI is converting your document to text..." />
+        <Loader text={t.fileUploadProcessing} />
       ) : (
         <>
           <div className={`flex flex-col items-center transition-transform duration-300 ${isDragging ? 'scale-95' : 'scale-100'}`}>
             <UploadIcon className="mx-auto h-12 w-12 text-accent-teal dark:text-accent-sky" />
             <span className="mt-4 block text-base sm:text-lg font-semibold text-text-primary dark:text-text-primary-dark">
-              Drag & Drop a Document Here
+              {t.fileUploadTitle}
             </span>
-            <span className="mt-1 block text-sm text-text-secondary dark:text-text-secondary-dark">or Click to Upload</span>
+            <span className="mt-1 block text-sm text-text-secondary dark:text-text-secondary-dark">{t.fileUploadSubtitle}</span>
             <input
                 ref={fileInputRef}
                 type="file"
@@ -83,7 +85,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isProcessing }) =
                 disabled={isProcessing}
             />
           </div>
-          <div className="mt-4 text-xs text-accent-sky dark:text-text-secondary-dark/70">Supports PDF, DOCX, TXT. AES-256 Encrypted.</div>
+          <div className="mt-4 text-xs text-accent-sky dark:text-text-secondary-dark/70">{t.fileUploadHint}</div>
         </>
       )}
     </div>

@@ -1,5 +1,3 @@
-
-
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Risk, Summary, QnAResponse, PIIConcern } from '../types';
 
@@ -82,13 +80,16 @@ export const extractTextFromFile = async (base64Data: string, mimeType: string):
     }
 };
 
-export const generateSummary = async (documentText: string): Promise<Summary> => {
-    const prompt = `
-    As an expert Indonesian legal analyst, your task is to meticulously analyze the following legal document. Base your analysis STRICTLY on the text provided. Do not infer or add information not present in the document.
+export const generateSummary = async (documentText: string, language: 'en' | 'id'): Promise<Summary> => {
+    const langInstruction = language === 'id' ? 'Bahasa Indonesia' : 'English';
+    const keyClausesTitle = language === 'id' ? 'Klausul & Ketentuan Penting' : 'Key Clauses & Terms';
 
-    Provide the following two summaries in Bahasa Indonesia:
+    const prompt = `
+    As an expert legal analyst for Indonesian documents, your task is to meticulously analyze the following legal document. Base your analysis STRICTLY on the text provided. Do not infer or add information not present in the document.
+
+    Provide the following two summaries in ${langInstruction}:
     1.  **Executive Summary**: A concise overview of the document's main purpose, the parties involved, and the primary legal outcomes or obligations.
-    2.  **Key Clauses & Terms**: A structured list identifying and explaining the most critical clauses. Focus on Indonesian legal concepts such as payment terms (ketentuan pembayaran), termination clauses (klausul pengakhiran), object of the agreement (objek perjanjian), dispute resolution (penyelesaian sengketa), etc.
+    2.  **${keyClausesTitle}**: A structured list identifying and explaining the most critical clauses. Focus on relevant legal concepts such as payment terms, termination clauses, object of the agreement, dispute resolution, etc.
 
     If a standard clause is missing, do not invent it. Your output must be grounded exclusively in the provided text.
 
@@ -134,7 +135,8 @@ export const generateSummary = async (documentText: string): Promise<Summary> =>
     }
 };
 
-export const analyzeRisks = async (documentText: string): Promise<Risk[]> => {
+export const analyzeRisks = async (documentText: string, language: 'en' | 'id'): Promise<Risk[]> => {
+    const langInstruction = language === 'id' ? 'Bahasa Indonesia' : 'English';
     const prompt = `
     As a senior Indonesian legal risk analyst, your task is to conduct a thorough risk assessment of the following legal document. Your analysis must be objective and based ONLY on the provided text and your knowledge of Indonesian law (e.g., UU ITE, UU Cipta Kerja, KUHPerdata, OJK regulations).
 
@@ -148,7 +150,7 @@ export const analyzeRisks = async (documentText: string): Promise<Risk[]> => {
 
     Do not invent risks or speculate beyond the document's content. If no significant risks are found, return an empty array [].
 
-    Return ONLY a valid JSON array of objects.
+    Return ONLY a valid JSON array of objects, with all text content (description, recommendation, etc.) in ${langInstruction}.
 
     DOCUMENT:
     ---
@@ -224,15 +226,20 @@ export const translateText = async (documentText: string, targetLanguage: 'engli
     }
 }
 
-export const answerQuestion = async (documentText: string, question: string): Promise<QnAResponse> => {
+export const answerQuestion = async (documentText: string, question: string, language: 'en' | 'id'): Promise<QnAResponse> => {
+    const langInstruction = language === 'id' ? 'Bahasa Indonesia' : 'English';
+    const notFoundMessage = language === 'id' 
+        ? "Informasi tidak ditemukan di dalam dokumen." 
+        : "Information not found in the document.";
+    
     const prompt = `
     As an AI legal assistant, your task is to answer a specific question based SOLELY on the content of the provided legal document. You must not use any external knowledge or make assumptions.
 
     1.  Read the user's question carefully.
     2.  Search the document for the information needed to answer the question.
-    3.  If a direct answer is found, provide a concise answer in Bahasa Indonesia.
+    3.  If a direct answer is found, provide a concise answer in ${langInstruction}.
     4.  Then, you MUST provide the exact, verbatim quote from the document that directly supports your answer.
-    5.  If the information to answer the question is NOT present in the document, you MUST state "Informasi tidak ditemukan di dalam dokumen." in the 'answer' field and leave the 'quote' field empty. Do not attempt to guess or infer an answer.
+    5.  If the information to answer the question is NOT present in the document, you MUST state "${notFoundMessage}" in the 'answer' field and leave the 'quote' field empty. Do not attempt to guess or infer an answer.
 
     DOCUMENT:
     ---
@@ -269,13 +276,17 @@ export const answerQuestion = async (documentText: string, question: string): Pr
     }
 };
 
-export const extractClause = async (documentText: string, clauseDescription: string): Promise<string> => {
+export const extractClause = async (documentText: string, clauseDescription: string, language: 'en' | 'id'): Promise<string> => {
+    const notFoundMessage = language === 'id' 
+        ? "Klausul yang relevan tidak dapat ditemukan di dalam dokumen." 
+        : "Relevant clause could not be found in the document.";
+
     const prompt = `
     Your task is to act as a clause extraction tool. From the legal document provided, find and extract the verbatim clause(s) that are most relevant to the following description: "${clauseDescription}".
 
     - Search the entire document for the most relevant section(s).
     - Return ONLY the exact text of the clause(s) you find. Include the full paragraph or section.
-    - If no relevant clause is found after a thorough search, return the exact string: "Klausul yang relevan tidak dapat ditemukan di dalam dokumen."
+    - If no relevant clause is found after a thorough search, return the exact string: "${notFoundMessage}"
     - Do not summarize, explain, or add any text other than the extracted clause or the "not found" message.
 
     DOCUMENT:
@@ -295,7 +306,8 @@ export const extractClause = async (documentText: string, clauseDescription: str
     }
 };
 
-export const redactPII = async (documentText: string): Promise<PIIConcern[]> => {
+export const redactPII = async (documentText: string, language: 'en' | 'id'): Promise<PIIConcern[]> => {
+    const langInstruction = language === 'id' ? 'Bahasa Indonesia' : 'English';
     const prompt = `
     As an AI data privacy analyst for Indonesian legal documents, your task is to meticulously scan the following document and identify all instances of Personally Identifiable Information (PII). Your analysis must be based strictly on the text provided.
 
@@ -305,6 +317,8 @@ export const redactPII = async (documentText: string): Promise<PIIConcern[]> => 
     1.  \`pii\`: The exact, verbatim text of the PII found.
     2.  \`concern\`: A brief explanation of the privacy or security risk associated with this piece of data being exposed.
     3.  \`recommendation\`: An actionable recommendation, such as "Consider redacting before external sharing" or "Verify if this information is necessary for the document's purpose."
+    
+    Provide all text content for 'concern' and 'recommendation' in ${langInstruction}.
 
     Search for, but do not limit your search to:
     - Full names of individuals (e.g., Budi Santoso, Citra Lestari)
@@ -346,7 +360,7 @@ export const redactPII = async (documentText: string): Promise<PIIConcern[]> => 
             }
         });
         const jsonStr = response.text.trim();
-        const cleanedJsonStr = jsonStr.replace(/^```json\s*|```\s*$/g, '');
+        const cleanedJsonStr = jsonStr.replace(/^```json\s*|```s*$/g, '');
         if (!cleanedJsonStr) {
           return [];
         }

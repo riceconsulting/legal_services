@@ -10,6 +10,7 @@ import { StampIcon } from './icons/StampIcon';
 import { TrashIcon } from './icons/TrashIcon';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import Tooltip from './Tooltip';
+import { translations } from '../lib/translations';
 
 interface DashboardProps {
   documents: Document[];
@@ -17,6 +18,7 @@ interface DashboardProps {
   onFileUpload: (file: File) => void;
   onDeleteDocument: (documentId: string) => void;
   isUploading: boolean;
+  language: 'en' | 'id';
 }
 
 const TypeIcon: React.FC<{ type: string; className: string }> = ({ type, className }) => {
@@ -36,9 +38,11 @@ const TypeIcon: React.FC<{ type: string; className: string }> = ({ type, classNa
 };
 
 
-const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFileUpload, onDeleteDocument, isUploading }) => {
+const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFileUpload, onDeleteDocument, isUploading, language }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [docToDelete, setDocToDelete] = useState<Document | null>(null);
+
+  const t = translations[language];
 
   const filteredDocuments = useMemo(() => {
     const trimmedQuery = searchQuery.trim();
@@ -90,14 +94,14 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                         </div>
                         <div className="hidden md:block">
                           <p className="text-sm text-text-secondary dark:text-text-secondary-dark">
-                            Last Modified:{' '}
+                            {t.lastModified}:{' '}
                             <time dateTime={doc.date}>{doc.date}</time>
                           </p>
                         </div>
                       </div>
                     </div>
                      <div className="flex items-center space-x-1 ml-4 flex-shrink-0">
-                        <Tooltip text={`Delete ${doc.name}`} position="left">
+                        <Tooltip text={t.deleteTooltip(doc.name)} position="left">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -124,15 +128,15 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-heading text-4xl sm:text-5xl font-bold text-text-primary dark:text-text-primary-dark">Welcome, Counsel</h1>
-        <p className="text-text-secondary dark:text-text-secondary-dark mt-1">Manage your legal documents with the power of AI.</p>
+        <h1 className="font-heading text-4xl sm:text-5xl font-bold text-text-primary dark:text-text-primary-dark">{t.dashboardTitle}</h1>
+        <p className="text-text-secondary dark:text-text-secondary-dark mt-1">{t.dashboardSubtitle}</p>
       </div>
       
-      <FileUpload onFileUpload={onFileUpload} isProcessing={isUploading} />
+      <FileUpload onFileUpload={onFileUpload} isProcessing={isUploading} language={language} />
 
       {documents.length > 0 ? (
         <div>
-            <h2 className="font-heading text-xl font-semibold text-text-primary dark:text-text-primary-dark mb-4">Recent Projects</h2>
+            <h2 className="font-heading text-xl font-semibold text-text-primary dark:text-text-primary-dark mb-4">{t.recentProjects}</h2>
             <div className="relative mb-4 group">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 <SearchIcon className="h-5 w-5 text-text-secondary dark:text-text-secondary-dark" aria-hidden="true" />
@@ -142,7 +146,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                 name="search"
                 id="search"
                 className="block w-full rounded-md border-0 bg-background-main dark:bg-surface-dark py-2.5 pl-10 pr-3 text-text-primary dark:text-text-primary-dark placeholder:text-text-secondary dark:placeholder:text-text-secondary-dark transition-shadow focus:ring-2 focus:ring-inset focus:ring-accent-teal dark:focus:ring-accent-sky sm:text-sm sm:leading-6"
-                placeholder="Search by name, type, or keyword..."
+                placeholder={t.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -161,10 +165,10 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                 <div className="h-full flex flex-col items-center justify-center px-6 py-12 text-center animate-fade-in">
                 <SearchIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
                 <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
-                    No documents found
+                    {t.noDocumentsFound}
                 </h3>
                 <p className="mt-1 text-sm text-text-secondary dark:text-text-secondary-dark max-w-sm">
-                    Your search for "{searchQuery}" did not match any documents. Try a different keyword.
+                    {t.noDocumentsFoundDesc(searchQuery)}
                 </p>
                 </div>
             )}
@@ -174,10 +178,10 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
             <div className="text-center py-12 animate-fade-in">
                 <DocumentIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                 <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
-                    Your Workspace is Ready
+                    {t.workspaceReady}
                 </h3>
                 <p className="mt-1 text-sm text-text-secondary dark:text-text-secondary-dark max-w-sm mx-auto">
-                   To get started, upload your first legal document. You can then analyze, identify risks, and ask questions with AI.
+                   {t.workspaceReadyDesc}
                 </p>
             </div>
         )}
@@ -186,9 +190,10 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
         isOpen={!!docToDelete}
         onClose={() => setDocToDelete(null)}
         onConfirm={handleConfirmDelete}
-        title="Confirm Deletion"
+        title={t.confirmDeletionTitle}
+        language={language}
       >
-        <p>Are you sure you want to permanently delete the document <strong className="font-semibold">{docToDelete?.name}</strong>? This action cannot be undone.</p>
+        <p dangerouslySetInnerHTML={{ __html: t.confirmDeletionDesc(docToDelete?.name) }} />
       </ConfirmationModal>
     </div>
   );

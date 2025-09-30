@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import type { Document } from './types';
 import Dashboard from './components/Dashboard';
@@ -7,10 +7,12 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import { MOCK_DOCUMENTS } from './constants';
 import * as geminiService from './services/geminiService';
+import { translations } from './lib/translations';
 
 const App: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>(MOCK_DOCUMENTS);
   const [isUploading, setIsUploading] = useState(false);
+  
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
       const storedTheme = window.localStorage.getItem('theme');
@@ -20,6 +22,20 @@ const App: React.FC = () => {
     }
     return 'light';
   });
+
+  const [language, setLanguage] = useState<'en' | 'id'>(() => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const storedLang = window.localStorage.getItem('language');
+      if (storedLang === 'en' || storedLang === 'id') {
+        return storedLang;
+      }
+    }
+    // Default to English if no preference is stored
+    return 'en';
+  });
+
+  const t = useMemo(() => translations[language], [language]);
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,8 +49,17 @@ const App: React.FC = () => {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  useEffect(() => {
+    localStorage.setItem('language', language);
+    document.documentElement.lang = language;
+  }, [language]);
+
   const toggleTheme = () => {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(prevLang => (prevLang === 'en' ? 'id' : 'en'));
   };
 
   const handleSelectDocument = (doc: Document) => {
@@ -123,6 +148,7 @@ const App: React.FC = () => {
                 key={document.id}
                 document={document} 
                 onBack={() => navigate('/')} 
+                language={language}
             />
         </div>
     );
@@ -130,7 +156,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark">
-      <Header theme={theme} toggleTheme={toggleTheme} />
+      <Header theme={theme} toggleTheme={toggleTheme} language={language} toggleLanguage={toggleLanguage} />
       <main className="flex-grow p-4 sm:p-6 lg:p-8">
         <Routes>
           <Route path="/" element={
@@ -141,6 +167,7 @@ const App: React.FC = () => {
                     onFileUpload={handleFileUpload}
                     onDeleteDocument={handleDeleteDocument}
                     isUploading={isUploading}
+                    language={language}
                 />
             </div>
             } 
@@ -148,7 +175,7 @@ const App: React.FC = () => {
           <Route path="/document/:documentId" element={<DocumentViewerWrapper />} />
         </Routes>
       </main>
-      <Footer />
+      <Footer language={language} />
     </div>
   );
 };

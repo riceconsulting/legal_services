@@ -1,13 +1,18 @@
 import React from 'react';
 import ThemeToggle from './ThemeToggle';
 import Tooltip from './Tooltip';
+import LanguageToggle from './LanguageToggle';
+import { translations } from '../lib/translations';
 
 interface HeaderProps {
     theme: 'light' | 'dark';
     toggleTheme: () => void;
+    language: 'en' | 'id';
+    toggleLanguage: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
+const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, toggleLanguage }) => {
+  const t = translations[language];
   return (
     <header className="bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-lg border-b border-border-light dark:border-border-dark sticky top-0 z-40 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -37,8 +42,11 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
           </div>
 
           {/* Right side: Action Icons */}
-          <div className="flex items-center gap-2 sm:gap-3">
-              <Tooltip text={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`} position="bottom">
+          <div className="flex items-center gap-1 sm:gap-2">
+              <Tooltip text={t.switchLanguage} position="bottom">
+                <LanguageToggle language={language} toggleLanguage={toggleLanguage} />
+              </Tooltip>
+              <Tooltip text={t.switchTheme(theme)} position="bottom">
                 <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
               </Tooltip>
           </div>
