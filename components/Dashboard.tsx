@@ -107,7 +107,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                               e.stopPropagation();
                               setDocToDelete(doc);
                             }}
-                            className="p-2 rounded-full text-text-secondary dark:text-text-secondary-dark hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                            className="p-2 rounded-full text-text-secondary dark:text-text-secondary-dark hover:bg-error-light dark:hover:bg-error-dark/20 hover:text-error-light dark:hover:text-error-dark opacity-0 group-hover:opacity-100 transition-all"
                             aria-label={`Delete ${doc.name}`}
                           >
                             <TrashIcon className="h-5 w-5" />

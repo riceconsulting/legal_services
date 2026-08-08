@@ -53,7 +53,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 rounded-md text-sm font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-surface-dark"
+            className="px-4 py-2 rounded-md text-sm font-semibold bg-error-light dark:bg-error-dark hover:bg-error-light dark:hover:bg-error-dark text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-light dark:focus:ring-accent-dark dark:focus:ring-offset-surface-dark"
           >
             {t.delete}
           </button>

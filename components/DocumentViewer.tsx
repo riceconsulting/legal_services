@@ -78,7 +78,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
         const result = analysisResult?.data;
 
         if (isLoading && !result) return <div className="flex justify-center items-center h-full p-4"><Loader text={type ? LOADING_MESSAGES[type] : undefined} /></div>;
-        if (error) return <div className="text-red-500 p-6 animate-fade-in">{error}</div>;
+        if (error) return <div className="text-error-light dark:text-error-dark p-6 animate-fade-in">{error}</div>;
         
         if (!type) return (
              <div className="p-6 h-full flex flex-col items-center justify-center text-center animate-fade-in">
@@ -217,8 +217,8 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
                 );
             case AnalysisTypeEnum.RISK_ANALYSIS:
                 const risks: Risk[] = result;
-                if (!Array.isArray(risks) || risks.length === 0) return <div className="p-4 text-green-600 dark:text-green-400 animate-fade-in">{t.noRisksFound}</div>;
-                const riskColorMap = { High: 'bg-red-500', Medium: 'bg-yellow-500', Low: 'bg-blue-500', Info: 'bg-gray-500' };
+                if (!Array.isArray(risks) || risks.length === 0) return <div className="p-4 text-success-light dark:text-success-dark animate-fade-in">{t.noRisksFound}</div>;
+                const riskColorMap = { High: 'bg-error-light dark:bg-error-dark', Medium: 'bg-warning-light dark:bg-warning-dark', Low: 'bg-accent-light dark:bg-accent-dark', Info: 'bg-gray-500' };
                 const riskLevelText = { High: 'High', Medium: 'Medium', Low: 'Low', Info: 'Info' };
                 if (language === 'id') {
                     riskLevelText.High = 'Tinggi';
@@ -234,7 +234,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
                                 </div>
                                 <p className="text-text-primary dark:text-text-primary-dark font-semibold">{risk.description}</p>
                                 <blockquote className="border-l-4 border-accent-sky dark:border-accent-teal pl-3 my-2 text-sm text-text-secondary dark:text-text-secondary-dark italic">"{risk.clause}"</blockquote>
-                                <p className="text-sm"><span className="font-semibold text-green-600 dark:text-green-400">{t.recommendation}:</span> <span className="text-text-primary dark:text-text-primary-dark">{risk.recommendation}</span></p>
+                                <p className="text-sm"><span className="font-semibold text-success-light dark:text-success-dark">{t.recommendation}:</span> <span className="text-text-primary dark:text-text-primary-dark">{risk.recommendation}</span></p>
                             </div>
                         ))}
                     </div>
@@ -243,14 +243,14 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
                  return <div className="p-4 animate-fade-in pb-16"><pre className="whitespace-pre-wrap font-sans text-sm text-text-primary dark:text-text-primary-dark">{result}</pre></div>;
             case AnalysisTypeEnum.REDACT_PII:
                 const piiConcerns: PIIConcern[] = result;
-                 if (!Array.isArray(piiConcerns) || piiConcerns.length === 0) return <div className="p-4 text-green-600 dark:text-green-400 animate-fade-in">{t.noPiiFound}</div>;
+                 if (!Array.isArray(piiConcerns) || piiConcerns.length === 0) return <div className="p-4 text-success-light dark:text-success-dark animate-fade-in">{t.noPiiFound}</div>;
                 return (
                     <div className="p-4 space-y-4 animate-fade-in pb-16">
                         {piiConcerns.map((item, index) => (
                              <div key={item.id || `pii-${index}`} className="bg-background-light dark:bg-background-dark p-4 rounded-lg border border-border-light dark:border-border-dark">
                                 <p className="text-text-primary dark:text-text-primary-dark font-semibold">{item.concern}</p>
                                 <blockquote className="border-l-4 border-accent-sky dark:border-accent-teal pl-3 my-2 text-sm text-text-secondary dark:text-text-secondary-dark italic">"{item.pii}"</blockquote>
-                                <p className="text-sm"><span className="font-semibold text-green-600 dark:text-green-400">{t.recommendation}:</span> <span className="text-text-primary dark:text-text-primary-dark">{item.recommendation}</span></p>
+                                <p className="text-sm"><span className="font-semibold text-success-light dark:text-success-dark">{t.recommendation}:</span> <span className="text-text-primary dark:text-text-primary-dark">{item.recommendation}</span></p>
                             </div>
                         ))}
                     </div>
@@ -445,7 +445,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, onBack, langu
     return (
       <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-text-primary dark:text-text-primary-dark">
         {parts[0]}
-        <mark id="highlighted-quote" className="bg-yellow-300 dark:bg-accent-sky/50 text-black dark:text-white px-1 rounded transition-all duration-300">
+        <mark id="highlighted-quote" className="bg-warning-light dark:bg-warning-dark dark:bg-accent-sky/50 text-black dark:text-white px-1 rounded transition-all duration-300">
           {highlightedQuote}
         </mark>
         {parts[1]}
