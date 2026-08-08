@@ -196,7 +196,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                                 <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium rounded">1. Document Summary</span>
                             </div>
                             <p className="text-xs text-text-primary-light dark:text-text-primary-dark">Putusan perkara perdata antara PT Maju Jaya Sejahtera (Penggugat) melawan CV Berkah Abadi Makmur (Tergugat) mengenai wanprestasi dalam pengadaan komponen elektronik senilai Rp 2.3 miliar.</p>
-                            <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 text-xs">
                                 <div><span className="text-text-secondary-light dark:text-text-secondary-dark">Jenis:</span> Putusan Pengadilan</div>
                                 <div><span className="text-text-secondary-light dark:text-text-secondary-dark">Pengadilan:</span> Pengadilan Negeri Surabaya</div>
                                 <div><span className="text-text-secondary-light dark:text-text-secondary-dark">Nomor:</span> 123/Pdt.G/2024/PA.Sby</div>
@@ -230,7 +230,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-medium rounded">4. Financial Impact Assessment</span>
                             </div>
-                            <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                                 <div className="p-2 bg-surface-light dark:bg-surface-dark rounded">
                                     <p className="text-text-secondary-light dark:text-text-secondary-dark">Nilai Kontrak</p>
                                     <p className="font-medium">Rp 2.300.000.000</p>
