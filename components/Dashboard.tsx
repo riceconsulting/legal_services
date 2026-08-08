@@ -189,13 +189,40 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                 <SampleOutput
                     title="Sample Output: Document Analysis"
                     description="Here's an example of how the AI analyzes legal documents."
-                    sampleData={[
-                        {
-                            label: 'Court Decision Analysis',
-                            content: `📄 **Document Summary**\nThis is a court decision from the Surabaya District Court regarding a commercial dispute between PT Maju Jaya Sejahtera (Plaintiff) and CV Berkah Abadi Makmur (Defendant).\n\n⚠️ **Legal Risks Identified**\n1. Contract Breach: Defendant failed to deliver goods according to agreed specifications\n2. Financial Liability: Defendant may be liable for damages totaling Rp 2.3 billion\n3. Performance Guarantee: Plaintiff's performance bond may be affected\n\n💡 **Recommendations**\n1. Immediate Action: Review contract terms and delivery schedules\n2. Documentation: Compile all correspondence and delivery records\n3. Settlement Consideration: Evaluate out-of-court settlement options\n4. Legal Consultation: Engage legal counsel for further assessment\n\n📋 **Document Metadata**\n• Type: Court Decision (Putusan Pengadilan)\n• Court: Surabaya District Court\n• Case Number: 123/Pdt.G/2024/PA.Sby\n• Date: June 25, 2024`
-                        }
-                    ]}
-                />
+                >
+                    <div className="bg-background-light dark:bg-background-dark rounded-lg p-4 border border-border-light dark:border-border-dark">
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium rounded">Court Decision</span>
+                            <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Surabaya District Court</span>
+                        </div>
+                        
+                        <h4 className="font-semibold text-text-primary-light dark:text-text-primary-dark">PT Maju Jaya Sejahtera vs CV Berkah Abadi Makmur</h4>
+                        <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1">Case No: 123/Pdt.G/2024/PA.Sby</p>
+                        
+                        <div className="mt-3 p-2 bg-surface-light dark:bg-surface-dark rounded border border-border-light dark:border-border-dark">
+                            <p className="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">📄 Document Summary</p>
+                            <p className="text-xs text-text-primary-light dark:text-text-primary-dark">Commercial dispute regarding breach of contract for electronic components supply.</p>
+                        </div>
+                        
+                        <div className="mt-3 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800/30">
+                            <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">⚠️ Legal Risks</p>
+                            <ul className="text-xs text-text-primary-light dark:text-text-primary-dark space-y-1">
+                                <li>1. Contract breach - goods not delivered per specs</li>
+                                <li>2. Financial liability - Rp 2.3 billion in damages</li>
+                                <li>3. Performance bond at risk</li>
+                            </ul>
+                        </div>
+                        
+                        <div className="mt-3 p-2 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800/30">
+                            <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">💡 Recommendations</p>
+                            <ul className="text-xs text-text-primary-light dark:text-text-primary-dark space-y-1">
+                                <li>1. Review contract terms immediately</li>
+                                <li>2. Compile all correspondence</li>
+                                <li>3. Consider out-of-court settlement</li>
+                            </ul>
+                        </div>
+                    </div>
+                </SampleOutput>
             </div>
         )}
 
