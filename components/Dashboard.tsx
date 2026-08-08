@@ -164,7 +164,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
                 </List>
             ) : (
                 <div className="h-full flex flex-col items-center justify-center px-6 py-12 text-center animate-fade-in">
-                <SearchIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
+                <SearchIcon className="w-16 h-16 text-border-light dark:text-border-dark mb-4" />
                 <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
                     {t.noDocumentsFound}
                 </h3>
@@ -178,7 +178,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
         ) : (
             <div className="flex flex-col items-center justify-center py-12 animate-fade-in gap-6">
                 <div className="text-center">
-                    <DocumentIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                    <DocumentIcon className="w-16 h-16 text-border-light dark:text-border-dark mx-auto mb-4" />
                     <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
                         {t.workspaceReady}
                     </h3>
@@ -264,7 +264,7 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
 
                         <div className="bg-background-light dark:bg-background-dark rounded-lg p-4 border border-border-light dark:border-border-dark">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="px-2 py-1 bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 text-xs font-medium rounded">6. Timeline & Deadlines</span>
+                                <span className="px-2 py-1 bg-surface-light dark:bg-surface-dark/30 text-text-primary-light dark:text-text-primary-dark text-xs font-medium rounded">6. Timeline & Deadlines</span>
                             </div>
                             <div className="space-y-2 text-xs">
                                 <div className="flex items-center gap-2">

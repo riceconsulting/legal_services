@@ -59,7 +59,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isProcessing, lan
 
   return (
     <div
-      className={`relative block w-full rounded-lg border-2 border-dashed p-12 text-center transition-all duration-300 ease-in-out ${isProcessing ? 'border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-surface-dark/50 cursor-not-allowed' : (isDragging ? 'border-primary-navy dark:border-accent-sky bg-accent-sky/20 dark:bg-accent-sky/10 scale-105' : 'border-accent-teal dark:border-border-dark hover:border-primary-navy dark:hover:border-accent-sky')}`}
+      className={`relative block w-full rounded-lg border-2 border-dashed p-12 text-center transition-all duration-300 ease-in-out ${isProcessing ? 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark/50 cursor-not-allowed' : (isDragging ? 'border-primary-navy dark:border-accent-sky bg-accent-sky/20 dark:bg-accent-sky/10 scale-105' : 'border-accent-teal dark:border-border-dark hover:border-primary-navy dark:hover:border-accent-sky')}`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}

@@ -82,7 +82,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
         
         if (!type) return (
              <div className="p-6 h-full flex flex-col items-center justify-center text-center animate-fade-in">
-                <SparklesIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
+                <SparklesIcon className="w-16 h-16 text-border-light dark:text-border-dark mb-4" />
                 <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
                     {t.aiToolkit}
                 </h3>
@@ -94,12 +94,12 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
         
         // Show the result if it exists, otherwise show the trigger UI
         if (!result) {
-            const commonButtonClasses = "w-full bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:text-primary-navy dark:hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-md transition duration-200 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-base transform hover:scale-105 active:scale-95";
+            const commonButtonClasses = "w-full bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:text-primary-navy dark:hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-md transition duration-200 disabled:bg-border-light dark:disabled:bg-border-dark disabled:cursor-not-allowed text-base transform hover:scale-105 active:scale-95";
 
             if (type === AnalysisTypeEnum.SUMMARY) {
                 return (
                     <div className="p-6 text-center animate-fade-in space-y-4 pb-16 flex flex-col justify-center h-full">
-                        <SummaryIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto" />
+                        <SummaryIcon className="w-12 h-12 text-text-secondary-light dark:text-text-secondary-dark mx-auto" />
                         <p className="text-sm text-text-secondary dark:text-text-secondary-dark">{t.generateSummaryDesc}</p>
                         <button onClick={() => onRunAnalysis(type)} disabled={isLoading} className={commonButtonClasses}>
                             {isLoading ? <span className="animate-pulse">Generating...</span> : t.generateSummary}
@@ -110,7 +110,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
             if (type === AnalysisTypeEnum.RISK_ANALYSIS) {
                 return (
                      <div className="p-6 text-center animate-fade-in space-y-4 pb-16 flex flex-col justify-center h-full">
-                        <RiskIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto" />
+                        <RiskIcon className="w-12 h-12 text-text-secondary-light dark:text-text-secondary-dark mx-auto" />
                         <p className="text-sm text-text-secondary dark:text-text-secondary-dark">{t.analyzeRisksDesc}</p>
                         <button onClick={() => onRunAnalysis(type)} disabled={isLoading} className={commonButtonClasses}>
                             {isLoading ? <span className="animate-pulse">Analyzing...</span> : t.analyzeRisks}
@@ -121,7 +121,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
              if (type === AnalysisTypeEnum.REDACT_PII) {
                 return (
                     <div className="p-6 text-center animate-fade-in space-y-4 pb-16 flex flex-col justify-center h-full">
-                        <RedactIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto" />
+                        <RedactIcon className="w-12 h-12 text-text-secondary-light dark:text-text-secondary-dark mx-auto" />
                         <p className="text-sm text-text-secondary dark:text-text-secondary-dark">{t.analyzePiiDesc}</p>
                         <button onClick={() => onRunAnalysis(type)} disabled={isLoading} className={commonButtonClasses}>
                             {isLoading ? <span className="animate-pulse">Analyzing...</span> : t.analyzePii}
@@ -139,13 +139,13 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
                             <div className="flex w-full rounded-lg bg-background-light dark:bg-background-dark p-1 border border-border-light dark:border-border-dark">
                                 <button
                                     onClick={() => setTargetLanguage('english')}
-                                    className={`w-full rounded-md py-1.5 text-sm font-semibold transition-colors ${targetLanguage === 'english' ? 'bg-accent-teal text-white shadow' : 'text-text-secondary hover:bg-gray-200 dark:hover:bg-surface-dark'}`}
+                                    className={`w-full rounded-md py-1.5 text-sm font-semibold transition-colors ${targetLanguage === 'english' ? 'bg-accent-teal text-white shadow' : 'text-text-secondary hover:bg-surface-light dark:hover:bg-surface-dark'}`}
                                 >
                                     {t.english}
                                 </button>
                                 <button
                                     onClick={() => setTargetLanguage('bahasa indonesia')}
-                                    className={`w-full rounded-md py-1.5 text-sm font-semibold transition-colors ${targetLanguage === 'bahasa indonesia' ? 'bg-accent-teal text-white shadow' : 'text-text-secondary hover:bg-gray-200 dark:hover:bg-surface-dark'}`}
+                                    className={`w-full rounded-md py-1.5 text-sm font-semibold transition-colors ${targetLanguage === 'bahasa indonesia' ? 'bg-accent-teal text-white shadow' : 'text-text-secondary hover:bg-surface-light dark:hover:bg-surface-dark'}`}
                                 >
                                     {t.bahasaIndonesia}
                                 </button>
@@ -154,7 +154,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
                         <button
                             onClick={() => onRunAnalysis(type, undefined, targetLanguage)}
                             disabled={isLoading}
-                            className="w-full bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:text-primary-navy dark:hover:bg-opacity-90 text-white font-bold py-2 px-4 rounded-md transition duration-200 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed">
+                            className="w-full bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:text-primary-navy dark:hover:bg-opacity-90 text-white font-bold py-2 px-4 rounded-md transition duration-200 disabled:bg-border-light dark:disabled:bg-border-dark disabled:cursor-not-allowed">
                             {isLoading ? <span className="animate-pulse">Translating...</span> : t.translateDocument}
                         </button>
                     </div>
@@ -163,7 +163,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
             if (type === AnalysisTypeEnum.QNA) {
                 return (
                     <div className="p-6 h-full flex flex-col items-center justify-center text-center animate-fade-in min-h-[200px]">
-                        <QnaIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
+                        <QnaIcon className="w-16 h-16 text-border-light dark:text-border-dark mb-4" />
                         <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
                             {t.askQuestion}
                         </h3>
@@ -176,7 +176,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
             if (type === AnalysisTypeEnum.CLAUSE_EXTRACTION) {
                 return (
                     <div className="p-6 h-full flex flex-col items-center justify-center text-center animate-fade-in min-h-[200px]">
-                        <ExtractIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
+                        <ExtractIcon className="w-16 h-16 text-border-light dark:text-border-dark mb-4" />
                         <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
                             {t.extractClause}
                         </h3>
@@ -218,7 +218,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
             case AnalysisTypeEnum.RISK_ANALYSIS:
                 const risks: Risk[] = result;
                 if (!Array.isArray(risks) || risks.length === 0) return <div className="p-4 text-success-light dark:text-success-dark animate-fade-in">{t.noRisksFound}</div>;
-                const riskColorMap = { High: 'bg-error-light dark:bg-error-dark', Medium: 'bg-warning-light dark:bg-warning-dark', Low: 'bg-accent-light dark:bg-accent-dark', Info: 'bg-gray-500' };
+                const riskColorMap = { High: 'bg-error-light dark:bg-error-dark', Medium: 'bg-warning-light dark:bg-warning-dark', Low: 'bg-accent-light dark:bg-accent-dark', Info: 'bg-text-secondary-light dark:bg-text-secondary-dark' };
                 const riskLevelText = { High: 'High', Medium: 'Medium', Low: 'Low', Info: 'Info' };
                 if (language === 'id') {
                     riskLevelText.High = 'Tinggi';
@@ -288,7 +288,7 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
                         <button
                             onClick={() => onRegenerate(type)}
                             disabled={isLoading}
-                            className="p-2 rounded-full text-text-secondary dark:text-text-secondary-dark hover:bg-gray-200 dark:hover:bg-white/10 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                            className="p-2 rounded-full text-text-secondary dark:text-text-secondary-dark hover:bg-surface-light dark:hover:bg-white/10 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                             aria-label="Regenerate response"
                         >
                             <RefreshIcon className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -305,14 +305,14 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         placeholder={placeholder}
-                        className="flex-grow bg-background-main dark:bg-surface-dark border border-gray-300 dark:border-border-dark rounded-md px-3 py-2 text-text-primary dark:text-text-primary-dark placeholder-text-secondary dark:placeholder-text-secondary-dark focus:ring-2 focus:ring-accent-teal dark:focus:ring-accent-sky focus:outline-none transition-shadow"
+                        className="flex-grow bg-background-main dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-md px-3 py-2 text-text-primary dark:text-text-primary-dark placeholder-text-secondary dark:placeholder-text-secondary-dark focus:ring-2 focus:ring-accent-teal dark:focus:ring-accent-sky focus:outline-none transition-shadow"
                         onKeyDown={(e) => e.key === 'Enter' && !isLoading && onRunAnalysis(type, inputValue)}
                         disabled={isLoading}
                     />
                     <button 
                         onClick={() => onRunAnalysis(type, inputValue)}
                         disabled={isLoading}
-                        className="bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:text-primary-navy dark:hover:bg-opacity-90 text-white font-bold py-2 px-4 rounded-md transition duration-200 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95">
+                        className="bg-accent-teal hover:bg-opacity-90 dark:bg-accent-sky dark:text-primary-navy dark:hover:bg-opacity-90 text-white font-bold py-2 px-4 rounded-md transition duration-200 disabled:bg-border-light dark:disabled:bg-border-dark disabled:cursor-not-allowed transform hover:scale-105 active:scale-95">
                         {isLoading ? <span className="animate-pulse">...</span> : t.send}
                     </button>
                 </div>
