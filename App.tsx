@@ -12,6 +12,7 @@ import { translations } from './lib/translations';
 const App: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>(MOCK_DOCUMENTS);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -97,7 +98,7 @@ const App: React.FC = () => {
             });
             fileContent = await geminiService.extractTextFromFile(base64Data, file.type);
         } else {
-            alert(`Unsupported file type: ${file.type}. Please upload a PDF, DOCX, or TXT file.`);
+            setUploadError(`Unsupported file type: ${file.type}. Please upload a PDF, DOCX, or TXT file.`);
             setIsUploading(false);
             return;
         }
@@ -114,7 +115,7 @@ const App: React.FC = () => {
         navigate(`/document/${newDoc.id}`);
     } catch (error) {
         console.error("Error processing file upload:", error);
-        alert(`An error occurred while processing the file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setUploadError(`Error processing file: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
         setIsUploading(false);
     }
@@ -158,6 +159,12 @@ const App: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark">
       <Header theme={theme} toggleTheme={toggleTheme} language={language} toggleLanguage={toggleLanguage} />
       <main className="flex-grow p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+        {uploadError && (
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-lg flex justify-between items-center">
+            <span className="text-sm">{uploadError}</span>
+            <button onClick={() => setUploadError(null)} className="ml-2 font-bold hover:text-red-900 dark:hover:text-red-200">×</button>
+          </div>
+        )}
         <Routes>
           <Route path="/" element={
             <div className="animate-fade-in">
