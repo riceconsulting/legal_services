@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, toggleLan
           </div>
 
           {/* Right side: Action Icons */}
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
               <Tooltip text={t.switchLanguage} position="bottom">
                 <LanguageToggle language={language} toggleLanguage={toggleLanguage} />
               </Tooltip>
