@@ -1,3 +1,7 @@
+const sanitizeHtml = (str: string): string => {
+    return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+};
+
 export const translations = {
   en: {
     // Header
@@ -21,7 +25,7 @@ export const translations = {
     fileUploadProcessing: 'AI is converting your document to text...',
     // Confirmation Modal
     confirmDeletionTitle: 'Confirm Deletion',
-    confirmDeletionDesc: (docName: string | undefined) => `Are you sure you want to permanently delete the document <strong>${docName || ''}</strong>? This action cannot be undone.`,
+    confirmDeletionDesc: (docName: string | undefined) => `Are you sure you want to permanently delete the document <strong>${sanitizeHtml(docName || '')}</strong>? This action cannot be undone.,
     cancel: 'Cancel',
     delete: 'Delete',
     // Document Viewer
@@ -93,7 +97,7 @@ export const translations = {
     fileUploadProcessing: 'AI sedang mengubah dokumen Anda menjadi teks...',
     // Confirmation Modal
     confirmDeletionTitle: 'Konfirmasi Penghapusan',
-    confirmDeletionDesc: (docName: string | undefined) => `Apakah Anda yakin ingin menghapus dokumen <strong>${docName || ''}</strong> secara permanen? Tindakan ini tidak dapat dibatalkan.`,
+    confirmDeletionDesc: (docName: string | undefined) => `Apakah Anda yakin ingin menghapus dokumen <strong>${sanitizeHtml(docName || '')}</strong> secara permanen? Tindakan ini tidak dapat dibatalkan.,
     cancel: 'Batal',
     delete: 'Hapus',
     // Document Viewer
