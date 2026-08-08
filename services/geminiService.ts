@@ -9,7 +9,7 @@ if (!API_KEY) {
 }
 
 const ai = new GoogleGenAI({ apiKey: API_KEY });
-const model = 'gemini-2.5-flash';
+const model = 'gemini-3.6-flash';
 
 /**
  * A centralized error handler for API calls.
