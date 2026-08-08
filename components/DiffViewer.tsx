@@ -160,14 +160,14 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ doc, baseVersionIndex, onClose 
       <style>{`
         @keyframes highlight-pulse {
             0%   { background-color: transparent; }
-            25%  { background-color: var(--highlight-color, rgba(88, 144, 173, 0.7)); }
-            50%  { background-color: var(--highlight-color-fade, rgba(88, 144, 173, 0.1)); }
-            75%  { background-color: var(--highlight-color, rgba(88, 144, 173, 0.7)); }
+            25%  { background-color: var(--highlight-color, var(--highlight-color)); }
+            50%  { background-color: var(--highlight-color-fade, var(--highlight-color-fade)); }
+            75%  { background-color: var(--highlight-color, var(--highlight-color)); }
             100% { background-color: transparent; }
         }
         .highlight-line {
-            --highlight-color: rgba(88, 144, 173, 0.7);
-            --highlight-color-fade: rgba(88, 144, 173, 0.1);
+            --highlight-color: var(--highlight-color);
+            --highlight-color-fade: var(--highlight-color-fade);
             animation: highlight-pulse 2s ease-in-out;
         }
         .dark .highlight-line {
