@@ -171,8 +171,8 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ doc, baseVersionIndex, onClose 
             animation: highlight-pulse 2s ease-in-out;
         }
         .dark .highlight-line {
-            --highlight-color: rgba(155, 187, 204, 0.6);
-            --highlight-color-fade: rgba(155, 187, 204, 0.1);
+            --highlight-color: var(--highlight-color);
+            --highlight-color-fade: var(--highlight-color-fade);
         }
       `}</style>
       <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in" style={{animationDuration: '0.3s'}} onClick={onClose}>

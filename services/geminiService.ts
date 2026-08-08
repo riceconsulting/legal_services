@@ -9,7 +9,7 @@ if (!API_KEY) {
 }
 
 const ai = new GoogleGenAI({ apiKey: API_KEY });
-const model = 'gemini-3.6-flash';
+const MODEL_NAME = 'gemini-3.6-flash';
 
 /**
  * A centralized error handler for API calls.
@@ -61,7 +61,7 @@ export const extractTextFromFile = async (base64Data: string, mimeType: string):
 
     try {
         const response = await ai.models.generateContent({
-            model: model,
+            model: MODEL_NAME,
             contents: {
                 parts: [
                     {
@@ -101,7 +101,7 @@ export const generateSummary = async (documentText: string, language: 'en' | 'id
 
     try {
         const response = await ai.models.generateContent({
-            model: model,
+            model: MODEL_NAME,
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
@@ -160,7 +160,7 @@ export const analyzeRisks = async (documentText: string, language: 'en' | 'id'):
 
     try {
         const response = await ai.models.generateContent({
-            model: model,
+            model: MODEL_NAME,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -217,7 +217,7 @@ export const translateText = async (documentText: string, targetLanguage: 'engli
 
     try {
         const response = await ai.models.generateContent({
-            model: model,
+            model: MODEL_NAME,
             contents: prompt,
         });
         return response.text;
@@ -252,7 +252,7 @@ export const answerQuestion = async (documentText: string, question: string, lan
 
     try {
         const response = await ai.models.generateContent({
-            model: model,
+            model: MODEL_NAME,
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
@@ -297,7 +297,7 @@ export const extractClause = async (documentText: string, clauseDescription: str
 
     try {
         const response = await ai.models.generateContent({
-            model: model,
+            model: MODEL_NAME,
             contents: prompt,
         });
         return response.text;
@@ -340,7 +340,7 @@ export const redactPII = async (documentText: string, language: 'en' | 'id'): Pr
 
     try {
         const response = await ai.models.generateContent({
-            model: model,
+            model: MODEL_NAME,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
