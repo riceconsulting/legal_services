@@ -31,10 +31,10 @@ const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, toggleLan
                   className="h-10 w-10 sm:h-12 sm:w-12 object-contain transition-transform group-hover:scale-105" 
                 />
                 <div className="flex flex-col leading-tight">
-                    <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-primary-navy dark:text-text-primary-dark">
+                    <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-text-primary-light dark:text-text-primary-dark">
                         RICE AI
                     </h1>
-                    <p className="font-sans text-xs sm:text-sm text-accent-teal dark:text-accent-sky tracking-wide opacity-90">
+                    <p className="font-sans text-xs sm:text-sm text-accent-light dark:text-accent-dark tracking-wide opacity-90">
                         AI Legal Consultant
                     </p>
                 </div>
