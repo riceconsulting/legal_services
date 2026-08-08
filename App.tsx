@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 import { MOCK_DOCUMENTS } from './constants';
 import * as geminiService from './services/geminiService';
 import { translations } from './lib/translations';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const App: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>(MOCK_DOCUMENTS);
@@ -156,6 +157,7 @@ const App: React.FC = () => {
   };
 
   return (
+    <ErrorBoundary>
     <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark transition-colors duration-300">
       <Header theme={theme} toggleTheme={toggleTheme} language={language} toggleLanguage={toggleLanguage} />
       <main className="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
@@ -184,6 +186,7 @@ const App: React.FC = () => {
       </main>
       <Footer language={language} />
     </div>
+    </ErrorBoundary>
   );
 };
 
