@@ -11,6 +11,7 @@ import { TrashIcon } from './icons/TrashIcon';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import Tooltip from './Tooltip';
 import { translations } from '../lib/translations';
+import SampleOutput from './SampleOutput';
 
 interface DashboardProps {
   documents: Document[];
@@ -175,14 +176,26 @@ const Dashboard: React.FC<DashboardProps> = ({ documents, onSelectDocument, onFi
             </div>
         </div>
         ) : (
-            <div className="text-center py-12 animate-fade-in">
-                <DocumentIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
-                    {t.workspaceReady}
-                </h3>
-                <p className="mt-1 text-sm text-text-secondary dark:text-text-secondary-dark max-w-sm mx-auto">
-                   {t.workspaceReadyDesc}
-                </p>
+            <div className="flex flex-col items-center justify-center py-12 animate-fade-in gap-6">
+                <div className="text-center">
+                    <DocumentIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                    <h3 className="font-heading text-lg font-medium text-text-primary dark:text-text-primary-dark">
+                        {t.workspaceReady}
+                    </h3>
+                    <p className="mt-1 text-sm text-text-secondary dark:text-text-secondary-dark max-w-sm mx-auto">
+                       {t.workspaceReadyDesc}
+                    </p>
+                </div>
+                <SampleOutput
+                    title="Sample Output: Document Analysis"
+                    description="Here's an example of how the AI analyzes legal documents."
+                    sampleData={[
+                        {
+                            label: 'Court Decision Analysis',
+                            content: `📄 **Document Summary**\nThis is a court decision from the Surabaya District Court regarding a commercial dispute between PT Maju Jaya Sejahtera (Plaintiff) and CV Berkah Abadi Makmur (Defendant).\n\n⚠️ **Legal Risks Identified**\n1. Contract Breach: Defendant failed to deliver goods according to agreed specifications\n2. Financial Liability: Defendant may be liable for damages totaling Rp 2.3 billion\n3. Performance Guarantee: Plaintiff's performance bond may be affected\n\n💡 **Recommendations**\n1. Immediate Action: Review contract terms and delivery schedules\n2. Documentation: Compile all correspondence and delivery records\n3. Settlement Consideration: Evaluate out-of-court settlement options\n4. Legal Consultation: Engage legal counsel for further assessment\n\n📋 **Document Metadata**\n• Type: Court Decision (Putusan Pengadilan)\n• Court: Surabaya District Court\n• Case Number: 123/Pdt.G/2024/PA.Sby\n• Date: June 25, 2024`
+                        }
+                    ]}
+                />
             </div>
         )}
 
