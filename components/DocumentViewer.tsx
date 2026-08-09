@@ -13,6 +13,7 @@ import { SparklesIcon } from './icons/SparklesIcon';
 import { RedactIcon } from './icons/RedactIcon';
 import { RefreshIcon } from './icons/RefreshIcon';
 import Tooltip from './Tooltip';
+import SampleOutput from './SampleOutput';
 import { translations } from '../lib/translations';
 
 // NEW: Interface for cached results
@@ -276,6 +277,108 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
     const placeholder = type === AnalysisTypeEnum.QNA ? t.qnaPlaceholder : t.clausePlaceholder;
     const isLoading = analysisResult?.isLoading ?? false;
 
+    // Sample outputs for each analysis type
+    const sampleOutputs: Record<string, { title: string; description: string; content: React.ReactNode }> = {
+        [AnalysisTypeEnum.SUMMARY]: {
+            title: "Sample Output: Ringkasan Dokumen",
+            description: "Ringkasan otomatis untuk dokumen Perjanjian Kerja Sama",
+            content: (
+                <div className="space-y-4">
+                    <div className="bg-background-light dark:bg-background-dark rounded-lg p-4 border border-border-light dark:border-border-dark">
+                        <h4 className="font-semibold text-accent-light dark:text-accent-dark mb-2">Ringkasan Eksekutif</h4>
+                        <p className="text-sm text-text-primary-light dark:text-text-primary-dark">Perjanjian kerja sama antara PT ABC dan PT XYZ untuk pengembangan aplikasi mobile selama 12 bulan dengan nilai kontrak Rp 500.000.000.</p>
+                    </div>
+                    <div className="bg-background-light dark:bg-background-dark rounded-lg p-4 border border-border-light dark:border-border-dark">
+                        <h4 className="font-semibold text-accent-light dark:text-accent-dark mb-2">Klausul Penting</h4>
+                        <ul className="text-sm text-text-primary-light dark:text-text-primary-dark space-y-1">
+                            <li>• Masa berlaku: 12 bulan sejak penandatanganan</li>
+                            <li>• Pembayaran: 30% di muka, 40% saat milestone, 30% saat serah terima</li>
+                            <li>• Hak kekayaan intelektual: Dimiliki bersama</li>
+                        </ul>
+                    </div>
+                </div>
+            )
+        },
+        [AnalysisTypeEnum.RISK_ANALYSIS]: {
+            title: "Sample Output: Analisis Risiko",
+            description: "Identifikasi risiko hukum dalam perjanjian",
+            content: (
+                <div className="space-y-4">
+                    <div className="bg-background-light dark:bg-background-dark rounded-lg p-4 border border-border-light dark:border-border-dark">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-medium rounded">HIGH</span>
+                            <span className="font-semibold text-text-primary-light dark:text-text-primary-dark">Klausul Penalti Tidak Seimbang</span>
+                        </div>
+                        <p className="text-sm text-text-primary-light dark:text-text-primary-dark">Pasal 8.2 memberlakukan penalti 20% dari nilai kontrak untuk keterlambatan, namun tidak ada kompensasi sejenis untuk keterlambatan dari pihak pertama.</p>
+                    </div>
+                    <div className="bg-background-light dark:bg-background-dark rounded-lg p-4 border border-border-light dark:border-border-dark">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs font-medium rounded">MEDIUM</span>
+                            <span className="font-semibold text-text-primary-light dark:text-text-primary-dark">Ketidakjelasan SLA</span>
+                        </div>
+                        <p className="text-sm text-text-primary-light dark:text-text-primary-dark">Definisi "kinerja memuaskan" dalam pasal 5.1 tidak terukur dan dapat menimbulkan sengketa.</p>
+                    </div>
+                </div>
+            )
+        },
+        [AnalysisTypeEnum.TRANSLATION]: {
+            title: "Sample Output: Terjemahan",
+            description: "Terjemahan dokumen ke Bahasa Inggris",
+            content: (
+                <div className="bg-background-light dark:bg-background-dark rounded-lg p-4 border border-border-light dark:border-border-dark">
+                    <p className="text-sm text-text-primary-light dark:text-text-primary-dark italic">"This Cooperation Agreement ("Agreement") is made between PT ABC ("First Party") and PT XYZ ("Second Party") regarding the development of a mobile application for a period of 12 months..."</p>
+                </div>
+            )
+        },
+        [AnalysisTypeEnum.QNA]: {
+            title: "Sample Output: Tanya Jawab",
+            description: "Jawaban atas pertanyaan tentang dokumen",
+            content: (
+                <div className="bg-background-light dark:bg-background-dark rounded-lg p-4 border border-border-light dark:border-border-dark">
+                    <p className="text-sm text-text-primary-light dark:text-text-primary-dark"><strong>Pertanyaan:</strong> Berapa lama masa berlaku kontrak ini?</p>
+                    <p className="text-sm text-text-primary-light dark:text-text-primary-dark mt-2"><strong>Jawaban:</strong> Masa berlaku kontrak adalah 12 bulan sejak tanggal penandatanganan, sebagaimana disebutkan dalam Pasal 3.1.</p>
+                </div>
+            )
+        },
+        [AnalysisTypeEnum.CLAUSE_EXTRACTION]: {
+            title: "Sample Output: Ekstraksi Klausul",
+            description: "Ekstraksi klausul khusus dari dokumen",
+            content: (
+                <div className="bg-background-light dark:bg-background-dark rounded-lg p-4 border border-border-light dark:border-border-dark">
+                    <h4 className="font-semibold text-accent-light dark:text-accent-dark mb-2">Klausul Pembayaran</h4>
+                    <p className="text-sm text-text-primary-light dark:text-text-primary-dark italic">"Pembayaran dilakukan dalam 3 tahap: (1) 30% dari nilai kontrak saat perjanjian ditandatangani, (2) 40% saat pencapaian milestone kedua, dan (3) 30% saat serah terima akhir."</p>
+                    <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-2">Lokasi: Pasal 6.1</p>
+                </div>
+            )
+        },
+        [AnalysisTypeEnum.REDACT_PII]: {
+            title: "Sample Output: Analisis PII",
+            description: "Identifikasi data pribadi dalam dokumen",
+            content: (
+                <div className="space-y-4">
+                    <div className="bg-background-light dark:bg-background-dark rounded-lg p-4 border border-border-light dark:border-border-dark">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-medium rounded">HIGH RISK</span>
+                            <span className="font-semibold text-text-primary-light dark:text-text-primary-dark">Nomor KTP</span>
+                        </div>
+                        <p className="text-sm text-text-primary-light dark:text-text-primary-dark">Ditemukan 3 nomor KTP dalam dokumen. Disarankan untuk meredacted atau mengganti dengan placeholder.</p>
+                    </div>
+                    <div className="bg-background-light dark:bg-background-dark rounded-lg p-4 border border-border-light dark:border-border-dark">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs font-medium rounded">MEDIUM RISK</span>
+                            <span className="font-semibold text-text-primary-light dark:text-text-primary-dark">Alamat Lengkap</span>
+                        </div>
+                        <p className="text-sm text-text-primary-light dark:text-text-primary-dark">Ditemukan 2 alamat lengkap yang termasuk data pribadi.</p>
+                    </div>
+                </div>
+            )
+        }
+    };
+
+    // Show sample output when no analysis has been run
+    const showSampleOutput = type && !analysisResult?.data && !isLoading;
+    const sampleData = type ? sampleOutputs[type] : null;
+
     return (
       <div className="h-full flex flex-col">
         <div className="p-4 border-b border-border-light dark:border-border-dark flex-shrink-0 bg-background-light/50 dark:bg-background-dark/30 flex items-center justify-center relative">
@@ -319,6 +422,14 @@ const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ type, analysisResult, onR
             </div>
         )}
         <div className="flex-grow overflow-y-auto">
+          {showSampleOutput && sampleData && (
+            <SampleOutput
+              title={sampleData.title}
+              description={sampleData.description}
+            >
+              {sampleData.content}
+            </SampleOutput>
+          )}
           {renderResult()}
         </div>
       </div>
