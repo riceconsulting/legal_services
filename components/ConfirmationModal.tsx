@@ -1,3 +1,6 @@
+const ANIMATION_DURATION_FAST = "0.2s";
+const ANIMATION_DURATION_NORMAL = "0.3s";
+
 import React from 'react';
 import { translations } from '../lib/translations';
 
@@ -25,7 +28,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   return (
     <div
       className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in"
-      style={{ animationDuration: '0.2s' }}
+      style={{ animationDuration: ANIMATION_DURATION_FAST }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -33,7 +36,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     >
       <div
         className="bg-background-main dark:bg-surface-dark w-full max-w-md rounded-lg shadow-2xl flex flex-col animate-slide-in-down"
-        style={{ animationDuration: '0.3s' }}
+        style={{ animationDuration: ANIMATION_DURATION_NORMAL }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">

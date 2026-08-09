@@ -1,3 +1,5 @@
+const ANIMATION_DURATION_NORMAL = "0.3s";
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import type { Document } from '../types';
 
@@ -175,7 +177,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ doc, baseVersionIndex, onClose 
             --highlight-color-fade: var(--highlight-color-fade);
         }
       `}</style>
-      <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in" style={{animationDuration: '0.3s'}} onClick={onClose}>
+      <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in" style={{animationDuration: ANIMATION_DURATION_NORMAL}} onClick={onClose}>
         <div className="bg-background-main dark:bg-surface-dark w-full max-w-7xl h-[90vh] rounded-lg shadow-2xl flex flex-col animate-slide-in-down" style={{animationDuration: '0.4s'}} onClick={e => e.stopPropagation()}>
           <header className="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center flex-wrap gap-2">
             <h2 className="font-heading text-xl font-bold text-text-primary dark:text-text-primary-dark">Compare Versions</h2>
