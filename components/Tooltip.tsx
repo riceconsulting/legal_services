@@ -1,3 +1,5 @@
+const Z_INDEX_TOOLTIP = 100;
+
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -118,7 +120,7 @@ const Tooltip: React.FC<TooltipProps> = ({ children, text, position = 'top' }) =
     <div
       ref={tooltipRef}
       role="tooltip"
-      style={{ ...style, position: 'fixed', zIndex: 100 }}
+      style={{ ...style, position: 'fixed', zIndex: Z_INDEX_TOOLTIP }}
       className={`
         w-max max-w-xs rounded-lg bg-background-dark/95 dark:bg-background-dark/95 backdrop-blur-sm px-3 py-1.5
         text-sm font-medium text-white dark:text-text-primary-dark text-center shadow-xl
